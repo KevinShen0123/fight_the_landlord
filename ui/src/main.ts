@@ -7,7 +7,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 import App from './App.vue'
 import Game from './views/Game.vue'
-
+import Chat from "./views/Chat.vue"
 const routes = [
 	{
 		path: "/:playerIndex",
@@ -17,7 +17,12 @@ const routes = [
 				playerIndex: route.params.playerIndex
 			}
 		}
-	}
+	},
+	{
+		path: "/chat/:username",
+		component:Chat ,
+		// Optionally, you can add props or any other route configurations here
+	  },
 ]
 
 const router = createRouter({
