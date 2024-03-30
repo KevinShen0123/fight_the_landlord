@@ -19,7 +19,7 @@ build_ui:
 build_server:
   stage: build
   script:
-    - cd ../server
+    - cd server
     - npm install
     - timeout 30s npm run start
 # # Test stage
