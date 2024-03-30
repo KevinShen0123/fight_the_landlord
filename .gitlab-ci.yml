@@ -13,18 +13,7 @@ stages:
 build_ui:
   stage: build
   script:
-    - cd ui
-    - apt install npm
-    - npm install
-    - npm run start
-
-# build_server:
-#   stage: build
-#   script:
-#     - cd ../server
-#     - npm install
-#     - npm run dev
-
+    - ./runproject.sh
 # # Test stage
 # test:
 #   stage: test
