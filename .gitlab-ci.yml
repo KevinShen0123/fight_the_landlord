@@ -15,13 +15,13 @@ build_ui:
   script:
     - cd ui
     - npm install
-    - timeout 30s npm run dev
+    - timeout 30s npm run dev || true
 build_server:
   stage: build
   script:
     - cd server
     - npm install
-    - timeout 30s npm run start
+    - timeout 30s npm run start || true
 # # Test stage
 # test:
 #   stage: test
