@@ -1,4 +1,4 @@
-# This is a basic example of a .gitlab-ci.yml file
+# This is an updated .gitlab-ci.yml file
 
 # Define the stages of your pipeline
 stages:
@@ -10,16 +10,30 @@ stages:
 # Jobs are executed in parallel unless explicitly dependent on each other
 
 # Build stage
-build:
+build_ui:
   stage: build
   script:
-    - echo "Building the project..."
+    - cd ui
+    - npm install
+    - npm run start
+
+build_server:
+  stage: build
+  script:
+    - cd ../server
+    - npm install
+    - npm run dev
 
 # Test stage
 test:
   stage: test
   script:
-    - echo "Running tests..."
+    - cd ui
+    - npm install
+    - npm test
+    - cd ../server
+    - npm install
+    - npm test
 
 # Deploy stage
 deploy:
