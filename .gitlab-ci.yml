@@ -1,5 +1,5 @@
 # This is an updated .gitlab-ci.yml file
-
+image: node:latest
 # Define the stages of your pipeline
 stages:
   - build
