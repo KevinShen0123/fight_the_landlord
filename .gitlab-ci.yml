@@ -1,0 +1,28 @@
+# This is a basic example of a .gitlab-ci.yml file
+
+# Define the stages of your pipeline
+stages:
+  - build
+  - test
+  - deploy
+
+# Define the jobs to be executed within each stage
+# Jobs are executed in parallel unless explicitly dependent on each other
+
+# Build stage
+build:
+  stage: build
+  script:
+    - echo "Building the project..."
+
+# Test stage
+test:
+  stage: test
+  script:
+    - echo "Running tests..."
+
+# Deploy stage
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying the project..."
