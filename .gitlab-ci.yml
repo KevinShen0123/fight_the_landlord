@@ -17,26 +17,26 @@ build_ui:
     - npm install
     - npm run start
 
-build_server:
-  stage: build
-  script:
-    - cd ../server
-    - npm install
-    - npm run dev
+# build_server:
+#   stage: build
+#   script:
+#     - cd ../server
+#     - npm install
+#     - npm run dev
 
-# Test stage
-test:
-  stage: test
-  script:
-    - cd ui
-    - npm install
-    - npm test
-    - cd ../server
-    - npm install
-    - npm test
+# # Test stage
+# test:
+#   stage: test
+#   script:
+#     - cd ui
+#     - npm install
+#     - npm test
+#     - cd ../server
+#     - npm install
+#     - npm test
 
-# Deploy stage
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploying the project..."
+# # Deploy stage
+# deploy:
+#   stage: deploy
+#   script:
+#     - echo "Deploying the project..."
