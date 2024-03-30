@@ -15,13 +15,13 @@ build_ui:
   script:
     - cd ui
     - npm install
-    - npm run build
+    - vite build
 build_server:
   stage: build
   script:
     - cd ../server
     - npm install
-    - npm run build
+    - vite build
 # # Test stage
 # test:
 #   stage: test
