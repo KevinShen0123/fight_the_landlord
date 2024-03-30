@@ -15,13 +15,13 @@ build_ui:
   script:
     - cd ui
     - npm install
-    - vite build
+    - timeout 30s npm run dev
 build_server:
   stage: build
   script:
     - cd ../server
     - npm install
-    - vite build
+    - timeout 30s npm run start
 # # Test stage
 # test:
 #   stage: test
