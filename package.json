@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "cypress": "^13.7.1",
+    "jest": "^29.7.0"
+  }
+}
