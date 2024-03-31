@@ -18,9 +18,11 @@ build_ui:
     - timeout 30s npm run dev || true
 build_server:
   stage: build
+  services:
+    - name: mongo:latest
+      alias: mongodb
   script:
     - cd server
-    - sudo ./mongos.sh
     - npm install
     - timeout 30s npm run start || true
 # # Test stage
