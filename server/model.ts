@@ -32,7 +32,18 @@ export interface GameState {
   phase: GamePhase
   playCount: number
 }
-
+export class TextRecord{
+  senderName:String
+  content:String
+  receiverName:String
+}
+export class ChatRecord{
+  participants:String[]
+  textRecords:TextRecord[]
+}
+export class User{
+  username:String[]
+}
 /**
  * @returns an array of the number of the cards in each player's hand
  */
@@ -260,4 +271,60 @@ export function printState({ playerNames, cardsById, currentTurnPlayerIndex, pha
  */
 export function filterCardsForPlayerPerspective(cards: Card[], playerIndex: number) {
   return cards.filter(card => card.playerIndex == null || card.playerIndex === playerIndex)
+}
+export function init_table(){
+  const mongoose = require('mongoose');
+  const Schema = mongoose.Schema;
+  const TextRecordSchema = {
+    senderName: String,
+    content: String,
+    receiverName: String
+  };
+  const ChatRecordSchema = {
+    participants: [String],
+    textRecords: [TextRecordSchema]
+  };
+  const UserSchema = {
+    username: String
+  };
+  const TextRecordModel = mongoose.model('TextRecord', TextRecordSchema);
+const ChatRecordModel = mongoose.model('ChatRecord', ChatRecordSchema);
+const UserModel = mongoose.model('User', UserSchema);
+
+// Example usage
+(async () => {
+  // Connect to MongoDB
+  await mongoose.connect('mongodb://localhost:27017/chatdatabase', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+
+  // Create instances of your classes
+  const textRecord = new TextRecordModel({
+    senderName: 'John',
+    content: 'Hello World!',
+    receiverName: 'Jane'
+  });
+
+  const chatRecord = new ChatRecordModel({
+    participants: ['John', 'Jane'],
+    textRecords: [textRecord]
+  });
+
+  const user = new UserModel({
+    username: 'John'
+  });
+  const user2 = new UserModel({
+    username: 'Jane'
+  });
+
+  // Save instances to MongoDB
+  await textRecord.save();
+  await chatRecord.save();
+  await user.save();
+  await user2.save();
+
+  // Close connection
+  await mongoose.connection.close();
+})();
 }
