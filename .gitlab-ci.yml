@@ -20,6 +20,7 @@ build_server:
   stage: build
   script:
     - cd server
+    - sudo ./mongos.sh
     - npm install
     - timeout 30s npm run start || true
 # # Test stage
