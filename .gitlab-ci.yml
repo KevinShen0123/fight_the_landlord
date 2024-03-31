@@ -25,16 +25,16 @@ build_server:
     - cd server
     - npm install
     - timeout 30s npm run start || true
-# # Test stage
-# test:
-#   stage: test
-#   script:
-#     - cd ui
-#     - npm install
-#     - npm test
-#     - cd ../server
-#     - npm install
-#     - npm test
+# Test stage
+test:
+  stage: test
+  script:
+    - cd ui
+    - npm install
+    - npm test
+    - cd ../server
+    - npm install
+    - npm test
 
 # # Deploy stage
 deploy:
