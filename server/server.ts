@@ -257,7 +257,6 @@ client.connect().then(() => {
       const username = req.params.username
       
     
-    
       try {
         const userSettings = await db.collection('users').findOne({ username: username });
         console.log("Settings")
@@ -272,6 +271,43 @@ client.connect().then(() => {
         res.status(500).json({ message: 'Internal server error' });
       }
     });
+
+
+    app.put('/api/settings/:username', async (req, res) => {
+      const username = req.params.username;
+      const score = Number(req.body.score);
+      const gamesPlayed = Number(req.body.gamesPlayed);
+      const gamesWon = Number(req.body.gamesWon);
+      const totalPlayTime = Number(req.body.totalPlayTime);
+    
+    
+   
+        
+        const updateResult = await db.collection('users').updateOne(
+          { username: username },
+          {
+            $set: {
+              score, 
+              gamesPlayed, 
+              gamesWon, 
+              totalPlayTime
+            }
+          }
+        );
+    
+     
+        if (updateResult.matchedCount === 0) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        
+        if (updateResult.modifiedCount === 0) {
+          return res.status(304).send(); 
+        }
+    
+        res.json({ message: 'Settings updated successfully' });
+      
+    });
+    
     
 
     // start server

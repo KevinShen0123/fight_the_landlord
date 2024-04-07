@@ -77,25 +77,25 @@
 
   
   async function updateSettings() {
-    // if (user.value && user.value.name) {
-    //   try {
-    //     const response = await fetch(`/api/settings/${user.value.name}`, {
-    //       method: 'PUT',
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify(settings.value),
-    //     });
+    if (user.value && user.value.name) {
+      try {
+        const response = await fetch(`/api/settings/${user.value.name}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(settings.value),
+        });
   
-    //     if (response.ok) {
-    //       alert('Settings updated successfully!');
-    //     } else {
-    //       alert('Failed to update settings.');
-    //     }
-    //   } catch (error) {
-    //     console.error("Error updating settings:", error);
-    //   }
-    // }
+        if (response.ok) {
+          alert('Settings updated successfully!');
+        } else {
+          alert('Failed to update settings.');
+        }
+      } catch (error) {
+        console.error("Error updating settings:", error);
+      }
+    }
   }
 
   
