@@ -19,22 +19,13 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { inject } from 'vue';
+  import { useRouter } from 'vue-router';
   
-  const user = ref({} as any)
   const router = useRouter()
-  
-  onMounted(async () => {
-    try {
-      const response = await fetch("/api/user");
-      if (response.ok) {
-        user.value = await response.json();
-      }
-    } catch (error) {
-      console.error("Failed to fetch user info", error);
-    }
-  });
+  const user = inject('user');
+
+
   
   function goToGame() {
     router.push({ name: 'Game' }); 

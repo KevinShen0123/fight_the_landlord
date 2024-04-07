@@ -11,11 +11,12 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy, generators } from 'openid-client'
 import passport from 'passport'
 import { gitlab } from "./secrets"
-
+import { User } from "./data"
 // set up Mongo
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(mongoUrl)
 let db: Db
+
 
 // set up Express
 const app = express()
@@ -219,8 +220,13 @@ client.connect().then(() => {
       const result = usersCollection.updateOne(
         { username: username }, 
         { 
-          $setOnInsert: { score: 0 },
-          $set: { lastLogin: new Date() } 
+          $setOnInsert: {
+            score: 0,
+            gamesPlayed: 0,
+            gamesWon: 0,
+            totalPlayTime: 0,
+          },
+          $set: { lastLogin: new Date() }
         },
         { upsert: true } 
       )
@@ -245,6 +251,28 @@ client.connect().then(() => {
         failureRedirect: "/api/login",
       })
     )    
+
+
+    app.get('/api/settings/:username', async (req, res) => {
+      const username = req.params.username
+      
+    
+    
+      try {
+        const userSettings = await db.collection('users').findOne({ username: username });
+        console.log("Settings")
+        console.log(userSettings)
+        if (!userSettings) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.json(userSettings || {});
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+      }
+    });
+    
 
     // start server
     server.listen(port)

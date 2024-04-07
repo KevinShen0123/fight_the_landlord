@@ -8,6 +8,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import App from './App.vue'
 import Game from './views/Game.vue'
 import HomePage from './views/Home.vue'
+import Setting  from './views/Setting.vue'
 
 const routes = [
   {
@@ -17,7 +18,13 @@ const routes = [
   {
     path: "/game",
     component: Game,
+    name: 'Game',
   },
+  {
+    path: "/settings",
+    component: Setting,
+    name: "Settings"
+  }
 
 ]
 

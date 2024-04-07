@@ -6,6 +6,9 @@ export interface StringIdDocument {
   export interface User extends StringIdDocument {
     username: string;
     score: number; 
+    gamesPlayed: number; 
+    gamesWon: number; 
+    totalPlayTime: number; 
   }
   
  
