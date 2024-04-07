@@ -7,17 +7,18 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 import App from './App.vue'
 import Game from './views/Game.vue'
+import HomePage from './views/Home.vue'
 
 const routes = [
-	{
-		path: "/:playerIndex",
-		component: Game,
-		props (route) {
-			return {
-				playerIndex: route.params.playerIndex
-			}
-		}
-	}
+  {
+    path: "/",
+    component: HomePage,
+  },
+  {
+    path: "/game",
+    component: Game,
+  },
+
 ]
 
 const router = createRouter({
