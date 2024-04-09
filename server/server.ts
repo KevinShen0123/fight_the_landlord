@@ -185,6 +185,8 @@ app.post(
 
 app.get("/api/user", (req, res) => {
   res.json(req.user || {})
+  //groups
+  //console.log((req.user as any).groups);
 })
 
 // connect to Mongo
@@ -208,6 +210,8 @@ client.connect().then(() => {
     function verify(tokenSet: any, userInfo: any, done: (error: any, user: any) => void) {
       console.log('userInfo', userInfo)
       console.log('tokenSet', tokenSet)
+
+      
 
 
       const username = userInfo.name
@@ -242,6 +246,7 @@ client.connect().then(() => {
       "/api/login", 
       passport.authenticate("oidc", { failureRedirect: "/api/login" }), 
       (req, res) => res.redirect("/")
+      
     )
     
     app.get(

@@ -41,15 +41,18 @@
     totalPlayTime: 0,
   });
 
-  
 
   onMounted(() => {
+   
   watchEffect(() => {
+    
     if (user.value && user.value.name) {
+      
+      
     
       (async () => {
         try {
-         
+          alert(user.value.groups)
           const response = await fetch(`/api/settings/${user.value.name}`, {
             method: 'GET', 
             headers: {

@@ -9,11 +9,14 @@ import App from './App.vue'
 import Game from './views/Game.vue'
 import HomePage from './views/Home.vue'
 import Setting  from './views/Setting.vue'
+import Login from './views/Login.vue'
+import Statistics from './views/Statistics.vue'
 
 const routes = [
   {
     path: "/",
     component: HomePage,
+    name: 'Home',
   },
   {
     path: "/game",
@@ -24,7 +27,18 @@ const routes = [
     path: "/settings",
     component: Setting,
     name: "Settings"
-  }
+  },
+  {
+    path: "/statistics",
+    name: "Statistics",
+    component: Statistics,
+
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+  },
 
 ]
 

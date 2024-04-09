@@ -7,13 +7,13 @@
       </b-navbar-brand>
       <b-navbar-nav>
         <b-nav-item v-if="user?.name == null" href="/api/login">Login</b-nav-item>
-        <b-nav-item v-if="user?.name" href="/settings">Settings</b-nav-item>
+        <b-nav-item v-if="user?.name" :to="{ name: 'Home' }">Home</b-nav-item> 
         <b-nav-item v-if="user?.name" @click="logout">Logout</b-nav-item>
         <form method="POST" action="/api/logout" id="logoutForm" />
 
       </b-navbar-nav>
     </b-navbar>
-    <router-view />
+    <router-view/>
   </div>
 </template>
 
@@ -30,4 +30,6 @@ onMounted(async () => {
 function logout() {
   ;(window.document.getElementById('logoutForm') as HTMLFormElement).submit()  
 }
+
+
 </script>
