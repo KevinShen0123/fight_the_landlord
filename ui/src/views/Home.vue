@@ -38,16 +38,11 @@
           <p>Please select your role:</p>
           <b-button v-if="user.groups.includes('fight-admin')" @click="selectRole('admin')">Admin</b-button>
           <b-button v-if="user.groups.includes('fight-player')" @click="selectRole('player')">Player</b-button>
-          </div>
+          
 
 
-          <div v-if="selectedRole === 'admin'">
-            <p>You have Admin access to the Card Game.</p>
-          </div>
-          <div v-else-if="selectedRole === 'player'">
-            <p>Ready to start a new game or continue where you left off?</p>
-            <b-button @click="goToGame" variant="success">Start Game</b-button>
-          </div>
+        </div>
+
 
        
         </div>
@@ -87,8 +82,11 @@
   const selectedRole = ref('');
   function selectRole(role) {
   selectedRole.value = role;
-
-
+  if (role === 'admin') {
+    router.push({ name: 'AdminPage' });
+  } else if (role === 'player') {
+    router.push({ name: 'PlayerPage' });
+  }
 }
   
   function goToGame() {

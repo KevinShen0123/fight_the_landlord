@@ -11,7 +11,8 @@ import HomePage from './views/Home.vue'
 import Setting  from './views/Setting.vue'
 import Login from './views/Login.vue'
 import Statistics from './views/Statistics.vue'
-
+import AdminHome from './views/AdminHome.vue'
+import PlayerHome from './views/PlayerHome.vue'
 const routes = [
   {
     path: "/",
@@ -39,6 +40,8 @@ const routes = [
     name: 'Login',
     component: Login,
   },
+  { path: '/admin', name: 'AdminPage', component: AdminHome },
+  { path: '/player', name: 'PlayerPage', component: PlayerHome },
 
 ]
 
