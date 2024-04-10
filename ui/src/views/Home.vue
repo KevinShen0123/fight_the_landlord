@@ -12,21 +12,20 @@
        
         <div v-else>
         <h1>Welcome back, {{ user.name }}!</h1>
-        <div v-if="!selectedRole">
-          <p>Please select your role:</p>
+       
+          <!-- <p>Please select your role:</p>
           <b-button v-if="user.groups.includes('fight-admin')" @click="selectRole('admin')">Admin</b-button>
           <b-button v-if="user.groups.includes('fight-player')" @click="selectRole('player')">Player</b-button>
-        </div>
+         -->
         
         
-        <AdminHome v-if="selectedRole === 'admin'" />
-        <PlayerHome v-if="selectedRole === 'player'" />
+        <AdminHome v-if="user?.roles?.includes('Admin')" />
+        <PlayerHome v-if="user?.roles?.includes('Player')" />
       </div>
        
-      <div v-if="selectedRole">
-  <b-button @click="switchRole" variant="warning">Switch Role</b-button>
-</div>
-
+      
+      <b-button v-if="(user.groups?.length || 0) >= 2" @click="switchRole" variant="warning">Switch Role</b-button>
+ 
 
 
       </b-container>
@@ -34,30 +33,35 @@
   </template>
   
   <script setup lang="ts">
-  import { inject,ref } from 'vue';
+  import { inject,ref,Ref } from 'vue';
   import AdminHome from './AdminHome.vue'; 
   import PlayerHome from './PlayerHome.vue'; 
 
   import { onMounted } from 'vue';
+  const user: Ref<any> = inject("user")!
+  
+    async function switchRole() {
 
-onMounted(() => {
-  const savedRole = localStorage.getItem('selectedRole');
-  if (savedRole) {
-    selectedRole.value = savedRole;
+  const currentRole = user.value.roles.includes('Admin') ? 'Admin' : 'Player';
+  const newRole = currentRole === 'Admin' ? 'Player' : 'Admin';
+
+  const response = await fetch(`/api/changeRole`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ newRole }) 
+  });
+
+  if (response.ok) {
+    const data = await response.json(); 
+    user.value = data; 
+    alert('Role updated successfully!');
+  } else {
+    alert('Failed to update Roles.');
   }
-});
-
-const user = inject('user');
-const selectedRole = ref('');
-
-function selectRole(role) {
-  selectedRole.value = role;
-  localStorage.setItem('selectedRole', role); 
 }
-function switchRole() {
-  selectedRole.value = ''; // 清空当前选择
-  localStorage.removeItem('selectedRole'); // 清除localStorage中的保存
-}
+
 
   </script>
   

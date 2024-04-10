@@ -12,6 +12,11 @@ import { Issuer, Strategy, generators } from 'openid-client'
 import passport from 'passport'
 import { gitlab } from "./secrets"
 import { User } from "./data"
+
+
+const OPERATOR_GROUP_ID = "fight-admin"
+
+
 // set up Mongo
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(mongoUrl)
@@ -189,6 +194,110 @@ app.get("/api/user", (req, res) => {
   //console.log((req.user as any).groups);
 })
 
+
+function checkAuthenticated(req: Request, res: Response, next: NextFunction) {
+  
+  if (!req.isAuthenticated()) {
+    res.sendStatus(401)
+    return
+  }
+
+  next()
+}
+function checkRole(requiredRoles: string[]) {
+  return function (req: Request, res: Response, next: NextFunction) {
+
+    const roles = (req.user as any)?.roles || [];
+    const hasRequiredRole = roles.some((role: string) => requiredRoles.includes(role));
+    console.log("hasRequiredRole", hasRequiredRole)
+    if (hasRequiredRole) {
+      next(); // User has one of the required roles, proceed
+    } else {
+      console.log("hasRequiredRole2", hasRequiredRole)
+
+      res.status(403).json({ message: "Access denied: Insufficient permissions" });
+    }
+  };
+}
+
+//specfic API for Player
+app.get('/api/settings/:username', checkAuthenticated, checkRole(["Player"]), async (req, res) => {
+  const username = req.params.username
+
+  try {
+    const userSettings = await db.collection('users').findOne({ username: username });
+    console.log("Settings")
+    console.log(userSettings)
+    if (!userSettings) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json(userSettings || {});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.put('/api/settings/:username', checkAuthenticated, checkRole(["Player"]),async (req, res) => {
+
+
+  
+  const username = req.params.username;
+  const score = Number(req.body.score);
+  const gamesPlayed = Number(req.body.gamesPlayed);
+  const gamesWon = Number(req.body.gamesWon);
+  const totalPlayTime = Number(req.body.totalPlayTime);
+
+
+
+    
+    const updateResult = await db.collection('users').updateOne(
+      { username: username },
+      {
+        $set: {
+          score, 
+          gamesPlayed, 
+          gamesWon, 
+          totalPlayTime
+        }
+      }
+    );
+
+ 
+    if (updateResult.matchedCount === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (updateResult.modifiedCount === 0) {
+      return res.status(304).send(); 
+    }
+
+    res.json({ message: 'Settings updated successfully' });
+  
+});
+
+//specfic API for Admin
+
+app.put('/api/changeRole', checkAuthenticated,async (req, res) => {
+
+
+  const { newRole } = req.body;
+  const user: any = req.user as any;
+
+
+  if (!newRole || !["Admin", "Player"].includes(newRole)) {
+    return res.status(400).json({ message: "Invalid role specified" });
+  }
+
+  user.roles = [newRole];
+
+  res.json(user);
+
+  
+  
+});
 // connect to Mongo
 client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
@@ -209,7 +318,9 @@ client.connect().then(() => {
   
     function verify(tokenSet: any, userInfo: any, done: (error: any, user: any) => void) {
       console.log('userInfo', userInfo)
+      userInfo.roles = userInfo.groups.includes(OPERATOR_GROUP_ID) ? ["Admin"] : ["Player"]
       console.log('tokenSet', tokenSet)
+      console.log('AfteruserInfo', userInfo)
 
       
 
@@ -258,61 +369,6 @@ client.connect().then(() => {
     )    
 
 
-    app.get('/api/settings/:username', async (req, res) => {
-      const username = req.params.username
-      
-    
-      try {
-        const userSettings = await db.collection('users').findOne({ username: username });
-        console.log("Settings")
-        console.log(userSettings)
-        if (!userSettings) {
-          return res.status(404).json({ message: 'User not found' });
-        }
-        
-        res.json(userSettings || {});
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-      }
-    });
-
-
-    app.put('/api/settings/:username', async (req, res) => {
-      const username = req.params.username;
-      const score = Number(req.body.score);
-      const gamesPlayed = Number(req.body.gamesPlayed);
-      const gamesWon = Number(req.body.gamesWon);
-      const totalPlayTime = Number(req.body.totalPlayTime);
-    
-    
-   
-        
-        const updateResult = await db.collection('users').updateOne(
-          { username: username },
-          {
-            $set: {
-              score, 
-              gamesPlayed, 
-              gamesWon, 
-              totalPlayTime
-            }
-          }
-        );
-    
-     
-        if (updateResult.matchedCount === 0) {
-          return res.status(404).json({ message: 'User not found' });
-        }
-        
-        if (updateResult.modifiedCount === 0) {
-          return res.status(304).send(); 
-        }
-    
-        res.json({ message: 'Settings updated successfully' });
-      
-    });
-    
     
 
     // start server

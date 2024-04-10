@@ -30,10 +30,10 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, inject, onMounted } from 'vue';
+  import { ref, inject, onMounted,Ref } from 'vue';
   import { watchEffect } from 'vue';
 
-  const user = inject('user');
+  const user: Ref<any> = inject("user")!
   const settings = ref({
     score: 0,
     gamesPlayed: 0,
