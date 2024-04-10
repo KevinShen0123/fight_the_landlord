@@ -293,6 +293,8 @@ app.put('/api/changeRole', checkAuthenticated,async (req, res) => {
 
   user.roles = [newRole];
 
+  
+
   res.json(user);
 
   

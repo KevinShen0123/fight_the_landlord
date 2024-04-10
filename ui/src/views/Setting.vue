@@ -1,5 +1,7 @@
 <template>
-    <div class="user-settings" v-if="user && user.name">
+   <div v-if="errorMessage">{{ errorMessage }}</div>
+
+    <div v-else class="user-settings" v-if="user && user.name">
       <b-container>
         <h1>{{ user.name }}'s Settings</h1>
         <b-form @submit.prevent="updateSettings">
@@ -27,6 +29,8 @@
         </b-form>
       </b-container>
     </div>
+
+   
   </template>
   
   <script setup lang="ts">
@@ -40,6 +44,8 @@
     gamesWon: 0,
     totalPlayTime: 0,
   });
+
+  const errorMessage = ref('');
 
 
   onMounted(() => {
@@ -60,17 +66,15 @@
             },
           });
 
-          if (response.ok) {    
+          if (response.ok) { 
+            alert("Successful")   
             const data = await response.json();
-
-          
-          
             settings.value = data;
           } else {
-            console.error("Failed to fetch settings");
+            errorMessage.value = 'Failed to load settings. You do not have permissions';
           }
         } catch (error) {
-          console.error("Error fetching settings:", error);
+          alert("Error fetching settings:");
         }
       })();
     }
