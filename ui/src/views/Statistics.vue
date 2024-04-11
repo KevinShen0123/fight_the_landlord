@@ -2,9 +2,18 @@
   <div class="statistics">
     <b-container>
       <h1>Game Statistics</h1>
-      <b-table striped hover :items="usersStatistics" :fields="fields">
+      <b-table striped hover :items="usersStatistics" :fields="fields" @head-clicked="changeSort">
         <template #cell(actions)="{ item }">
           <b-button size="sm" variant="danger" @click="clearUserData(item.username)">Clear Data</b-button>
+        </template>
+        
+        <template #head({ key, label, sortable })>
+          <span v-if="sortable" @click="() => changeSort(key)">
+            {{ label }} <!-- 显示字段的标签 -->
+          </span>
+          <span v-else>
+            {{ label }}
+          </span>
         </template>
       </b-table>
     </b-container>
@@ -16,6 +25,7 @@ import { ref, onMounted } from 'vue';
 import { BButton } from 'bootstrap-vue';
 
 const usersStatistics = ref([]);
+const currentSort = ref({ sortBy: 'gamesPlayed', sortDesc: false });
 const fields = [
   { key: 'username', label: 'Username' },
   { key: 'gamesPlayed', label: 'Games Played' },
@@ -35,7 +45,17 @@ async function fetchUsersStatistics() {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      let data = await response.json();
+      data = data.sort((a, b) => {
+        const sortField = currentSort.value.sortBy;
+        let comparison = 0;
+        if (a[sortField] < b[sortField]) {
+          comparison = currentSort.value.sortDesc ? 1 : -1;
+        } else if (a[sortField] > b[sortField]) {
+          comparison = currentSort.value.sortDesc ? -1 : 1;
+        }
+        return comparison;
+      });
       usersStatistics.value = data;
     } else {
       console.error('Failed to load user statistics');
@@ -49,6 +69,17 @@ onMounted(async () => {
   fetchUsersStatistics();
 });
 
+function changeSort(sortBy) {
+  if (currentSort.value.sortBy === sortBy) {
+    // Toggle the direction of sorting
+    currentSort.value.sortDesc = !currentSort.value.sortDesc;
+  } else {
+    // Change the sorting field and set the default sorting direction
+    currentSort.value.sortBy = sortBy;
+    currentSort.value.sortDesc = false;
+  }
+  fetchUsersStatistics();
+}
 async function clearUserData(username) {
   const response = await fetch(`/api/user/${username}/clear`, {
     method: 'POST', 
@@ -69,5 +100,9 @@ async function clearUserData(username) {
 <style scoped>
 .statistics {
   padding: 20px;
+}
+.sortable-header:hover {
+  cursor: pointer;
+  text-decoration: underline;
 }
 </style>
