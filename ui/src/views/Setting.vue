@@ -1,5 +1,7 @@
 <template>
-   <div v-if="errorMessage">{{ errorMessage }}</div>
+   <div v-if="errorMessage" class="alert alert-danger fade show" role="alert">
+        {{ errorMessage }}
+    </div>
 
     <div v-else class="user-settings" v-if="user && user.name">
       <b-container>
@@ -61,7 +63,6 @@
     if (user.value && user.value.name) {
       (async () => {
         try {
-          alert(user.value.groups)
           const response = await fetch(`/api/settings/${user.value.name}`, {
             method: 'GET', 
             headers: {
@@ -76,7 +77,7 @@
             errorMessage.value = 'Failed to load settings. You do not have permissions';
           }
         } catch (error) {
-          alert("Error fetching settings:");
+          errorMessage.value  = "Error fetching settings:" ;
         }
       })();
     }
@@ -96,12 +97,12 @@
           body: JSON.stringify(settings.value),
         });
 
-        alert(settings.value.personalInformation)
+
   
         if (response.ok) {
-          alert('Settings updated successfully!');
+          console.log('Settings updated successfully!');
         } else {
-          alert('Failed to update settings.');
+          console.log('Failed to update settings.');
         }
       } catch (error) {
         console.error("Error updating settings:", error);
@@ -111,4 +112,10 @@
 
   
   </script>
+
+  <style>
+  .alert {
+  transition: opacity 0.5s ease-in-out;
+}
+</style>
   

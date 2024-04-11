@@ -14,7 +14,7 @@ import { gitlab } from "./secrets"
 import { User } from "./data"
 
 
-const OPERATOR_GROUP_ID = "fight-admin"
+const ADMIN_GROUP_ID = "fight-admin"
 
 
 // set up Mongo
@@ -369,7 +369,7 @@ client.connect().then(() => {
   
     function verify(tokenSet: any, userInfo: any, done: (error: any, user: any) => void) {
       console.log('userInfo', userInfo)
-      userInfo.roles = userInfo.groups.includes(OPERATOR_GROUP_ID) ? ["Admin"] : ["Player"]
+      userInfo.roles = userInfo.groups.includes(ADMIN_GROUP_ID) ? ["Admin"] : ["Player"]
       console.log('tokenSet', tokenSet)
       console.log('AfteruserInfo', userInfo)
 

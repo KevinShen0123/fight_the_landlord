@@ -1,36 +1,30 @@
 <template>
-
-    <div class="home">
-      <b-container>
+  <div class="home">
+    <b-container class="mt-5">
       
-        <div v-if="!user.name">
-          <h1>Welcome to the Card Game!</h1>
-          <p>This is a fun and engaging card game you can play with friends or solo.</p>
-          <b-button href="/api/login" variant="primary">Login to Play</b-button>
-        </div>
+      <b-card v-if="!user.name" class="text-center">
+        <h1>Welcome to the Fight the Landlord Card Game!</h1>
+        <p>This is a fun traditional Chinese card game.</p>
+        <b-button href="/api/login" variant="primary" class="custom-btn">Login to Play</b-button>
+      </b-card>
 
-       
-        <div v-else>
+      <b-card v-else class="text-center">
         <h1>Welcome back, {{ user.name }}!</h1>
-       
-          <!-- <p>Please select your role:</p>
-          <b-button v-if="user.groups.includes('fight-admin')" @click="selectRole('admin')">Admin</b-button>
-          <b-button v-if="user.groups.includes('fight-player')" @click="selectRole('player')">Player</b-button>
-         -->
-        
-        
         <AdminHome v-if="user?.roles?.includes('Admin')" />
         <PlayerHome v-if="user?.roles?.includes('Player')" />
-      </div>
-       
-      
-      <b-button v-if="(user.groups?.length || 0) >= 2" @click="switchRole" variant="warning">Switch Role</b-button>
- 
 
+        <b-button 
+          v-if="user.groups?.length >= 2 && user.groups.includes('fight-admin') && user.groups.includes('fight-player')"
+          @click="switchRole" 
+          variant="warning" 
+          class="custom-btn">
+          Switch Role
+        </b-button>
+      </b-card>
+    </b-container>
+  </div>
+</template>
 
-      </b-container>
-    </div>
-  </template>
   
   <script setup lang="ts">
   import { inject,ref,Ref } from 'vue';
@@ -56,9 +50,8 @@
   if (response.ok) {
     const data = await response.json(); 
     user.value = data; 
-    alert('Role updated successfully!');
   } else {
-    alert('Failed to update Roles.');
+    console.log('Failed to update Roles.');
   }
 }
 
@@ -68,7 +61,36 @@
   <style>
   .home {
     text-align: center;
-    margin-top: 50px;
+  }
+  
+  b-card {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .custom-btn {
+    font-weight: bold;
+    margin-top: 20px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .custom-btn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  
+  b-button {
+    cursor: pointer;
+  }
+  
+  b-container {
+    max-width: 800px; /* Adjust the max width of the container */
+    margin: auto;
   }
   </style>
+  
   
