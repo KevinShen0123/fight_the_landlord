@@ -249,6 +249,7 @@ app.put('/api/settings/:username', checkAuthenticated, checkRole(["Player"]),asy
   const gamesPlayed = Number(req.body.gamesPlayed);
   const gamesWon = Number(req.body.gamesWon);
   const totalPlayTime = Number(req.body.totalPlayTime);
+  const personalInformation = req.body.personalInformation
 
 
 
@@ -260,7 +261,8 @@ app.put('/api/settings/:username', checkAuthenticated, checkRole(["Player"]),asy
           score, 
           gamesPlayed, 
           gamesWon, 
-          totalPlayTime
+          totalPlayTime,
+          personalInformation,
         }
       }
     );
@@ -300,13 +302,60 @@ app.put('/api/changeRole', checkAuthenticated,async (req, res) => {
   
   
 });
+
+
+app.get('/api/statistics/users', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+  
+  try {
+    const users = await db.collection('users').find({}).toArray();
+    console.log("STA USER")
+    console.log(users)
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/api/user/:username/clear', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const updateResult = await db.collection('users').updateOne(
+      { username: username },
+      {
+        $set: {
+          gamesPlayed: 0,
+          gamesWon: 0,
+          score: 0,
+          totalPlayTime: 0,
+          personalInformation:""
+
+        }
+      }
+    );
+
+    if (updateResult.matchedCount === 0) {
+     
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (updateResult.modifiedCount === 0) {
+      
+      return res.status(200).json({ message: 'User data was already reset' });
+    }
+
+
+    res.json({ message: `User ${username}'s data reset successfully` });
+  } catch (error) {
+    console.error('Error resetting user data:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 // connect to Mongo
 client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
   db = client.db("fightTheLandlord")
-  // operators = db.collection('operators')
-  // orders = db.collection('orders')
-  // customers = db.collection('customers')
 
   Issuer.discover("https://coursework.cs.duke.edu/").then(issuer => {
     const client = new issuer.Client(gitlab)
@@ -342,6 +391,7 @@ client.connect().then(() => {
             gamesPlayed: 0,
             gamesWon: 0,
             totalPlayTime: 0,
+            personalInformation:""
           },
           $set: { lastLogin: new Date() }
         },

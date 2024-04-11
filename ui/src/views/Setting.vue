@@ -10,19 +10,24 @@
           </b-form-group>
   
           <b-form-group label="Score" label-for="score">
-            <b-form-input id="score" v-model="settings.score" placeholder="Current score"></b-form-input>
+            <b-form-input id="score" readonly :value="settings.score" placeholder="Current score"></b-form-input>
           </b-form-group>
   
           <b-form-group label="Games Played" label-for="gamesPlayed">
-            <b-form-input id="gamesPlayed" v-model="settings.gamesPlayed" placeholder="Number of games played"></b-form-input>
+            <b-form-input id="gamesPlayed" readonly :value="settings.gamesPlayed" placeholder="Number of games played"></b-form-input>
           </b-form-group>
   
           <b-form-group label="Games Won" label-for="gamesWon">
-            <b-form-input id="gamesWon" v-model="settings.gamesWon" placeholder="Number of games won"></b-form-input>
+            <b-form-input id="gamesWon" readonly :value="settings.gamesWon" placeholder="Number of games won"></b-form-input>
           </b-form-group>
   
           <b-form-group label="Total Play Time (minutes)" label-for="totalPlayTime">
-            <b-form-input id="totalPlayTime" v-model="settings.totalPlayTime" placeholder="Total play time in minutes"></b-form-input>
+            <b-form-input id="totalPlayTime" readonly :value="settings.totalPlayTime" placeholder="Total play time in minutes"></b-form-input>
+          </b-form-group>
+
+
+          <b-form-group label="Personal Information" label-for="personalInformation">
+            <b-form-input id="personalInformation" v-model="settings.personalInformation" placeholder="Please enter your personal information"></b-form-input>
           </b-form-group>
   
           <b-button type="submit" variant="primary">Update Settings</b-button>
@@ -43,6 +48,7 @@
     gamesPlayed: 0,
     gamesWon: 0,
     totalPlayTime: 0,
+    personalInformation: ""
   });
 
   const errorMessage = ref('');
@@ -53,9 +59,6 @@
   watchEffect(() => {
     
     if (user.value && user.value.name) {
-      
-      
-    
       (async () => {
         try {
           alert(user.value.groups)
@@ -67,7 +70,6 @@
           });
 
           if (response.ok) { 
-            alert("Successful")   
             const data = await response.json();
             settings.value = data;
           } else {
@@ -93,6 +95,8 @@
           },
           body: JSON.stringify(settings.value),
         });
+
+        alert(settings.value.personalInformation)
   
         if (response.ok) {
           alert('Settings updated successfully!');
