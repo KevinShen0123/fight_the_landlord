@@ -328,3 +328,66 @@ const UserModel = mongoose.model('User', UserSchema);
   await mongoose.connection.close();
 })();
 }
+export async function getAllObjectsFromTable() {
+  const mongoose = require('mongoose');
+  const TextRecordModel = mongoose.model('TextRecord');
+  const ChatRecordModel = mongoose.model('ChatRecord');
+  const UserModel = mongoose.model('User');
+
+  try {
+    // Connect to MongoDB
+    await mongoose.connect('mongodb://localhost:27017/chatdatabase', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+
+    // Query all objects from each collection
+    const textRecords = await TextRecordModel.find();
+    const chatRecords = await ChatRecordModel.find();
+    const users = await UserModel.find();
+
+    // Close connection
+    await mongoose.connection.close();
+
+    // Return the queried objects
+    return {
+      textRecords: textRecords,
+      chatRecords: chatRecords,
+      users: users
+    };
+  } catch (error) {
+    // Handle error
+    console.error('Error querying objects:', error);
+    throw error;
+  }
+}
+export async function writechat(sender:String,content:String,Receiver:String){
+  const mongoose = require('mongoose');
+  const TextRecordSchema = {
+    senderName: String,
+    content: String,
+    receiverName: String
+  }
+  const TextRecordModel = mongoose.model('TextRecord', TextRecordSchema);
+  (async () => {
+    // Connect to MongoDB
+    await mongoose.connect('mongodb://localhost:27017/chatdatabase', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+  
+    // Create instances of your classes
+    const textRecord = new TextRecordModel({
+      senderName: sender,
+      content: content,
+      receiverName: Receiver
+    });
+  
+    // Save instances to MongoDB
+    await textRecord.save();
+  
+    // Close connection
+    await mongoose.connection.close();
+  })();
+}
+
