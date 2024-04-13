@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed, ref, Ref } from 'vue'
 import { io } from "socket.io-client"
-import { Card, GamePhase, Action, formatCard, CardId } from "../model"
+import { Card, GamePhase, Action, CardId } from "../model"
 import AnimatedCard from "./AnimatedCard.vue"
 const socket = io()
 const playerIndex: Ref<number | "all"> = ref("all")

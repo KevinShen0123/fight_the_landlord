@@ -26,17 +26,20 @@
     import { areCompatible,Card } from "../../../server/model"
   
     const props = defineProps({
-      card: Object,
-      lastPlayedCard: Object as PropType<Card | null | undefined>,
-      includeLocation: Boolean
-    });
+  card: {
+    type: Object as PropType<Card>,
+    default: () => ({}) // 提供一个默认空对象，视具体情况而定
+  },
+  lastPlayedCard: Object as PropType<Card | null | undefined>,
+  includeLocation: Boolean
+});
     
       // Computed property to check if the card is legal to play
     const isLegalToPlay = computed(() => {
       if (props.lastPlayedCard === null) {
         return true;
       }
-      return areCompatible(props.card, props.lastPlayedCard);
+      return areCompatible(props.card, (props as any).lastPlayedCard);
     });
   
     const isLastPlayedCard = computed(() => {
