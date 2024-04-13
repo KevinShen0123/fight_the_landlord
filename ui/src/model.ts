@@ -143,6 +143,7 @@ function moveCardToPlayer({ currentTurnPlayerIndex, cardsById }: GameState, card
   card.locationType = "player-hand"
   card.playerIndex = currentTurnPlayerIndex
   card.positionInLocation = Math.max(-1, ...(currentCardPositions.filter((pos): pos is number => pos !== null))) + 1;
+
 }
 
 function moveCardToLastPlayed({ cardsById }: GameState, card: Card) {

@@ -9,7 +9,6 @@ import App from './App.vue'
 import Game from './views/Game.vue'
 import HomePage from './views/Home.vue'
 import Setting  from './views/Setting.vue'
-import Login from './views/Login.vue'
 import Statistics from './views/Statistics.vue'
 import AdminHome from './views/AdminHome.vue'
 import PlayerHome from './views/PlayerHome.vue'
@@ -35,11 +34,6 @@ const routes = [
     component: Statistics,
 
   },
-  {
-    path: '/login',
-    name: 'Login',
-    component: Login,
-  },
   { path: '/admin', name: 'AdminPage', component: AdminHome },
   { path: '/player', name: 'PlayerPage', component: PlayerHome },
 
@@ -51,7 +45,7 @@ const router = createRouter({
 })
 
 createApp(App)
-	.use(BootstrapVue)
-	.use(BootstrapVueIcons)
+	.use(BootstrapVue as any)
+	.use(BootstrapVueIcons as any)
 	.use(router)
 	.mount('#app')

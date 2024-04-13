@@ -27,11 +27,10 @@
 
   
   <script setup lang="ts">
-  import { inject,ref,Ref } from 'vue';
+  import { inject,Ref } from 'vue';
   import AdminHome from './AdminHome.vue'; 
   import PlayerHome from './PlayerHome.vue'; 
 
-  import { onMounted } from 'vue';
   const user: Ref<any> = inject("user")!
   
     async function switchRole() {

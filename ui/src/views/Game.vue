@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, Ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
 import { io } from "socket.io-client"
-import { Card, GamePhase, Action, formatCard, CardId } from "../../../server/model"
+import { Card, GamePhase, Action, formatCard, CardId } from "../model"
 
 const socket = io()
 const playerIndex: Ref<number | "all"> = ref("all")
@@ -47,7 +47,7 @@ socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: numb
 })
 
 function doAction(action: Action) {
-  return new Promise<Card[]>((resolve, reject) => {
+  return new Promise<Card[]>((resolve,) => {
     socket.emit("action", action)
     socket.once("updated-cards", (updatedCards: Card[]) => {
       resolve(updatedCards)

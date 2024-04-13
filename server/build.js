@@ -8,4 +8,7 @@ build({
   format: 'cjs',
   bundle: true,
   plugins: [esbuildPluginPino({ transports: ['pino-pretty'] })],
-}).catch(() => process.exit(1))
+}).catch((error) => {
+  console.error(error);
+  process.exit(1);
+})
