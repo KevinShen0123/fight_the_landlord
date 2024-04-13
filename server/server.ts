@@ -1,6 +1,6 @@
 import { createServer } from "http"
 import { Server } from "socket.io"
-import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card } from "./model"
+import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card, getLastPlayedCard } from "./model"
 import express, { NextFunction, Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import pino from 'pino'
@@ -82,7 +82,7 @@ const wrap = (middleware: any) => (socket: any, next: any) => middleware(socket.
 io.use(wrap(sessionMiddleware))
 
 // hard-coded game configuration
-const playerUserIds = ["jx133"]
+const playerUserIds = ["jx133","ks713"]
 let gameState = createEmptyGame(playerUserIds, 1, 2)
 
 function emitUpdatedCardsForPlayers(cards: Card[], newGame = false) {
@@ -113,7 +113,7 @@ io.on('connection', client => {
       playerIndex,
       gameState.currentTurnPlayerIndex,
       gameState.phase,
-      gameState.playCount,
+      gameState.playCount
     )
   }
   
@@ -154,6 +154,7 @@ io.on('connection', client => {
       gameState.currentTurnPlayerIndex,
       gameState.phase,
       gameState.playCount,
+      getLastPlayedCard(gameState.cardsById)
     )
   })
 
@@ -171,6 +172,7 @@ io.on('connection', client => {
       gameState.currentTurnPlayerIndex,
       gameState.phase,
       gameState.playCount,
+      getLastPlayedCard(gameState.cardsById),
     )
   })
 })
