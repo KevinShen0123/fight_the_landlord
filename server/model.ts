@@ -1,12 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 // data model for cards and game state
-
 export const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 export const SUITS = ["♦️", "♥️", "♣️", "♠️"]
 
 export type CardId = string
 export type LocationType = "unused" | "last-card-played" | "player-hand"
-
+import mongoose, { Schema,connect } from 'mongoose';
 export interface Card {
   id: CardId
   rank: typeof RANKS[number]
@@ -273,20 +272,19 @@ export function filterCardsForPlayerPerspective(cards: Card[], playerIndex: numb
   return cards.filter(card => card.playerIndex == null || card.playerIndex === playerIndex)
 }
 export function init_table(){
-  const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
-  const TextRecordSchema = {
+  const TextRecordSchema = new Schema({
     senderName: String,
     content: String,
     receiverName: String
-  };
-  const ChatRecordSchema = {
+  });
+  const ChatRecordSchema = new Schema({
     participants: [String],
     textRecords: [TextRecordSchema]
-  };
-  const UserSchema = {
+  });
+  const UserSchema = new Schema({
     username: String
-  };
+  });
   const TextRecordModel = mongoose.model('TextRecord', TextRecordSchema);
 const ChatRecordModel = mongoose.model('ChatRecord', ChatRecordSchema);
 const UserModel = mongoose.model('User', UserSchema);
@@ -294,10 +292,8 @@ const UserModel = mongoose.model('User', UserSchema);
 // Example usage
 (async () => {
   // Connect to MongoDB
-  await mongoose.connect('mongodb://localhost:27017/chatdatabase', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
+  await mongoose.connect('mongodb://localhost:27017/chatdatabase'
+  );
 
   // Create instances of your classes
   const textRecord = new TextRecordModel({
@@ -329,17 +325,13 @@ const UserModel = mongoose.model('User', UserSchema);
 })();
 }
 export async function getAllObjectsFromTable() {
-  const mongoose = require('mongoose');
   const TextRecordModel = mongoose.model('TextRecord');
   const ChatRecordModel = mongoose.model('ChatRecord');
   const UserModel = mongoose.model('User');
 
   try {
     // Connect to MongoDB
-    await mongoose.connect('mongodb://localhost:27017/chatdatabase', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect('mongodb://localhost:27017/chatdatabase');
 
     // Query all objects from each collection
     const textRecords = await TextRecordModel.find();
@@ -362,19 +354,16 @@ export async function getAllObjectsFromTable() {
   }
 }
 export async function writechat(sender:String,content:String,Receiver:String){
-  const mongoose = require('mongoose');
-  const TextRecordSchema = {
+  const Schema = mongoose.Schema;
+  const TextRecordSchema = new Schema({
     senderName: String,
     content: String,
     receiverName: String
-  }
+  })
   const TextRecordModel = mongoose.model('TextRecord', TextRecordSchema);
   (async () => {
     // Connect to MongoDB
-    await mongoose.connect('mongodb://localhost:27017/chatdatabase', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect('mongodb://localhost:27017/chatdatabase');
   
     // Create instances of your classes
     const textRecord = new TextRecordModel({
