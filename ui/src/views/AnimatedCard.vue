@@ -1,0 +1,107 @@
+<template>
+    <b-card
+      class="animated-card"
+      :class="{'illegal': !isLegalToPlay,
+                'last-played' : isLastPlayedCard,
+                'unused' : unused
+        }"
+      @click="$emit('cardClick', card?.id)"
+      :title="'[' + paddedCardId + '] '"
+      border-variant="primary"
+      body-class="card-info"
+    >
+    <b-card-text class = "rankAndsuit">
+      {{ cardDisplayText }}
+      </b-card-text>
+      <!-- <template v-slot:footer v-if="includeLocation">
+        <div class="location-info">
+          {{ card?.locationType }} {{ card?.playerIndex ?? "" }}
+        </div>
+      </template> -->
+    </b-card>
+  </template>
+    
+    <script setup lang="ts">
+    import { computed,PropType} from 'vue';
+    import { areCompatible,Card } from "../../../server/model"
+  
+    const props = defineProps({
+  card: Object as PropType<Card | null | undefined>,
+  lastPlayedCard: Object as PropType<Card | null | undefined>,
+  includeLocation: Boolean,
+ 
+});
+    
+const cardDisplayText = computed(() => {
+  return props.card ? `${props.card.rank}${props.card.suit}` : '';
+});
+      // Computed property to check if the card is legal to play
+    const isLegalToPlay = computed(() => {
+      if (props.lastPlayedCard === null) {
+        return true;
+      }
+      return areCompatible(props.card as any, (props as any).lastPlayedCard);
+    });
+  
+    const isLastPlayedCard = computed(() => {
+      return props.card?.id === props.lastPlayedCard?.id
+    })
+  
+  
+    const unused = computed(() => {
+      return props.card?.locationType === "unused"
+    })
+  
+    const paddedCardId = computed(() => {
+      let id = (props.card as any).id
+      while (id.length < 3) {
+        id = " " + id;
+      }
+      return id;
+    });
+    </script>
+  
+  <style>
+  .animated-card {
+    flex: 0 1 90px; 
+    max-width: 90px; 
+    height: 135px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center children vertically */
+    align-items: center; /* Center children horizontally */
+    position: relative; /* Add this to position your rankAndsuit absolutely */
+  }
+  .card-info {
+    white-space: nowrap;
+    /* monospace */
+    font-family: 'Courier New', Courier, monospace; 
+  }
+  .location-info {
+  
+    font-family: 'Courier New', Courier, monospace;
+    position: absolute; /* Positioning it relative to the card */
+    bottom: 5px; /* Distance from the bottom */
+    left: 0;
+    width: 100%; /* Full width to center the text */
+    text-align: center; /* Center the text within the div */
+  }
+  .illegal {
+  
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .last-played{
+    border-color: purple;
+    box-shadow: 0 0 14px purple;
+  }
+  .unused{
+    background-color: gray
+  
+  }
+  .rankAndsuit{
+    text-align: center;
+    font-size: 2em; 
+    font-weight: bold; 
+  }
+  </style>
