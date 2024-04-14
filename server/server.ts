@@ -8,18 +8,23 @@ const port = 8101
 
 let gameState = createEmptyGame(["player1", "player2"], 1, 13)
 
-function emitUpdatedCardsForPlayers(cards: Card[], newGame = false) {
+function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
-    let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(cards, i)
+    let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(cards, i);
     if (newGame) {
-      updatedCardsFromPlayerPerspective = updatedCardsFromPlayerPerspective.filter(card => card.locationType !== "unused")
+      updatedCardsFromPlayerPerspective = updatedCardsFromPlayerPerspective.filter(card => card.locationType !== "unused");
     }
-    console.log("emitting update for player", i, ":", updatedCardsFromPlayerPerspective)
-    io.to(String(i)).emit(
-      newGame ? "all-cards" : "updated-cards", 
-      updatedCardsFromPlayerPerspective,
-    )
-  })
+    if (toAll) {
+      io.to(String(i)).emit(newGame ? "all-cards" : "updated-cards", updatedCardsFromPlayerPerspective);
+    } else if (i === gameState.currentTurnPlayerIndex) {
+      io.to(String(i)).emit(newGame ? "all-cards" : "updated-cards", updatedCardsFromPlayerPerspective);
+    }
+  });
+
+  if (newGame) {
+    gameState.phase = "play";
+    emitAllGameState();  
+  }
 }
 
 let allPlayersConnected = false;
@@ -28,23 +33,11 @@ function checkAllPlayersConnected() {
   if (gameState.connectedPlayers.size === gameState.playerNames.length) {
     allPlayersConnected = true
     distributeInitialCards(gameState,3);
-    emitUpdatedCardsForAllPlayers(true);
+    emitCardUpdates(Object.values(gameState.cardsById), true, true);
   }
 }
 
-function emitUpdatedCardsForAllPlayers(newGame = false) {
-  gameState.playerNames.forEach((_, i) => {
-    let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(Object.values(gameState.cardsById), i);
-    if (newGame) {
-      updatedCardsFromPlayerPerspective = updatedCardsFromPlayerPerspective.filter(card => card.locationType !== "unused");
-    }
-    io.to(String(i)).emit(newGame ? "all-cards" : "updated-cards", updatedCardsFromPlayerPerspective);
-  });
 
-  gameState.phase = "play";
-  emitAllGameState(); 
-
-}
 
 function emitAllGameState() {
   io.emit( 
@@ -97,7 +90,7 @@ io.on('connection', client => {
   client.on("action", (action: Action) => {
     if (typeof playerIndex === "number") {
       const updatedCards = doAction(gameState, { ...action, playerIndex })
-      emitUpdatedCardsForPlayers(updatedCards)
+      emitCardUpdates(updatedCards,false,true)
     } else {
       // no actions allowed from "all"
     }
@@ -116,7 +109,7 @@ io.on('connection', client => {
   client.on("new-game", () => {
     gameState = createEmptyGame(gameState.playerNames, 2, 2)
     const updatedCards = Object.values(gameState.cardsById)
-    emitUpdatedCardsForPlayers(updatedCards, true)
+    emitCardUpdates(updatedCards,true,true)
     io.to("all").emit(
       "all-cards", 
       updatedCards,

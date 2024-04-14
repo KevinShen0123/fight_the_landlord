@@ -104,18 +104,6 @@ export function distributeInitialCards(state: GameState, cardsPerPlayer: number)
     moveCardToLastPlayed(state, card)
   }
 
-
-
-
-  
-
-
-  
-
-  console.log("Distribute completed")
-
-
-  
 }
 
 
@@ -237,26 +225,7 @@ export function doAction(state: GameState, action: Action): Card[] {
     changedCards.push(card)
   }
 
-  if (state.phase === "initial-card-dealing") {
-    if (action.action !== "draw-card") {
-      return []
-    }
-
-    const counts = computePlayerCardCounts(state)
-    if (Math.max(...counts) === Math.min(...counts) && counts[0] === 3) {
-      // we are done drawing player cards
-      // draw one card to be the last card played
-      const cardId = findNextCardToDraw(state.cardsById)
-      if (cardId == null) {
-        return []
-      }
-      const card = state.cardsById[cardId]
-      moveCardToLastPlayed(state, card)
-      changedCards.push(card)
-      state.phase = "play"
-    }
-    moveToNextPlayer(state)
-  } else if (action.action === "play-card") {
+  if (action.action === "play-card") {
     const card = state.cardsById[action.cardId]
     if (card.playerIndex !== state.currentTurnPlayerIndex) {
       // not your card
