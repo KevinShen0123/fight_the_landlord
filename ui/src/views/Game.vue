@@ -24,6 +24,7 @@
       <div class="cards-container">
         <AnimatedCard
             v-for="card in lastPlayedCards"
+            :class="card.id"
             :key="card.id"
             :card="card"
             :includeLocation="true"
@@ -46,10 +47,10 @@
             :card="card"
             :includeLocation="true"
             :lastPlayedCard="lastPlayedCard"
-            @cardClick="setcanplayCard"
+            @cardClick="setcanplayCard(card.id)"
           />
           </div>
-          <button :disabled="!canPlayCard">Play Cards</button>
+          <button @click="playcards(cardIds)" :disabled="!canPlayCard">Play Cards</button>
         </div>
       </div>
 
@@ -68,6 +69,7 @@ import { io } from "socket.io-client"
 import { Card, GamePhase, Action, formatCard, CardId } from "../../../server/model"
 import AnimatedCard from "./AnimatedCard.vue"
 const canPlayCard:Ref<Boolean>=ref(false)
+const cardIds:Ref<CardId[]>=ref([])
 // props
 interface Props {
   playerIndex?: string
@@ -161,8 +163,18 @@ async function playCard(cardId: CardId) {
     }
   }
 }
-async function setcanplayCard(){
+async function playcards(cardIds:CardId[]){
+  alert("playcards length:"+String(cardIds.length))
+  for(const cardid of cardIds){
+    playCard(cardid)
+    alert("called Play card"+String(cardid))
+  }
+  canPlayCard.value=false
+}
+async function setcanplayCard(thiscardId:String){
+  cardIds.value.push(String(thiscardId))
   canPlayCard.value=true
+  alert("one card clocked"+String(cardIds.value.length))
 }
 
 async function applyUpdatedCards(updatedCards: Card[]) {
