@@ -46,9 +46,10 @@
             :card="card"
             :includeLocation="true"
             :lastPlayedCard="lastPlayedCard"
-            @cardClick="playCard(card.id)"
+            @cardClick="setcanplayCard"
           />
           </div>
+          <button :disabled="!canPlayCard">Play Cards</button>
         </div>
       </div>
 
@@ -66,6 +67,7 @@ import { computed, onMounted, ref, Ref } from 'vue'
 import { io } from "socket.io-client"
 import { Card, GamePhase, Action, formatCard, CardId } from "../../../server/model"
 import AnimatedCard from "./AnimatedCard.vue"
+const canPlayCard:Ref<Boolean>=ref(false)
 // props
 interface Props {
   playerIndex?: string
@@ -158,6 +160,9 @@ async function playCard(cardId: CardId) {
       alert("didn't work")
     }
   }
+}
+async function setcanplayCard(){
+  canPlayCard.value=true
 }
 
 async function applyUpdatedCards(updatedCards: Card[]) {
