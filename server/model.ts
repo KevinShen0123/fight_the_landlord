@@ -31,6 +31,7 @@ export interface GameState {
   currentTurnPlayerIndex: number
   phase: GamePhase
   playCount: number
+  connectedPlayers: Set<number> // 新字段，跟踪已连接的玩家的索引
 }
 
 /**
@@ -71,6 +72,42 @@ export function getLastPlayedCard(cardsById: Record<CardId, Card>) {
   return playerIndex === -1 ? null : playerIndex
 }
 
+
+export function distributeInitialCards(state: GameState, cardsPerPlayer: number) {
+
+
+  
+
+  if (state.connectedPlayers.size !== state.playerNames.length) {
+    console.log("Not all players have connected yet. Cannot distribute cards.");
+    return;
+  }
+
+
+  for (let i = 0; i < state.playerNames.length; i++) {
+    for (let j = 0; j < cardsPerPlayer; j++) {
+      const cardId = findNextCardToDraw(state.cardsById);
+      if (cardId != null) {
+        const card = state.cardsById[cardId];
+        console.log(card)
+        moveCardToPlayer(state, card);
+      }
+      
+    }
+    moveToNextPlayer(state)
+  }
+
+
+
+  
+
+  console.log("Distribute completed")
+
+
+  
+}
+
+
 /**
  * creates an empty GameState in the initial-card-dealing state
  */
@@ -88,11 +125,15 @@ export function getLastPlayedCard(cardsById: Record<CardId, Card>) {
           locationType: "unused",
           playerIndex: null,
           positionInLocation: null,
+          
         }
         cardsById[card.id] = card
       }
     }
   }
+
+  
+
 
   return {
     playerNames,
@@ -100,6 +141,7 @@ export function getLastPlayedCard(cardsById: Record<CardId, Card>) {
     currentTurnPlayerIndex: 0,
     phase: "initial-card-dealing",
     playCount: 0,
+    connectedPlayers: new Set(), 
   }
 }
 

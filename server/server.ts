@@ -1,6 +1,6 @@
 import http from "http"
 import { Server } from "socket.io"
-import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card,getLastPlayedCard } from "./model"
+import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card,getLastPlayedCard,distributeInitialCards } from "./model"
 
 const server = http.createServer()
 const io = new Server(server)
@@ -22,6 +22,39 @@ function emitUpdatedCardsForPlayers(cards: Card[], newGame = false) {
   })
 }
 
+let allPlayersConnected = false;
+function checkAllPlayersConnected() {
+  
+  if (gameState.connectedPlayers.size === gameState.playerNames.length) {
+    allPlayersConnected = true
+    distributeInitialCards(gameState,3);
+    emitUpdatedCardsForAllPlayers(true);
+  }
+}
+
+function emitUpdatedCardsForAllPlayers(newGame = false) {
+  gameState.playerNames.forEach((_, i) => {
+    let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(Object.values(gameState.cardsById), i);
+    if (newGame) {
+      updatedCardsFromPlayerPerspective = updatedCardsFromPlayerPerspective.filter(card => card.locationType !== "unused");
+    }
+    io.to(String(i)).emit(newGame ? "all-cards" : "updated-cards", updatedCardsFromPlayerPerspective);
+  });
+
+  gameState.phase = "play";
+  emitAllGameState(); 
+
+}
+
+function emitAllGameState() {
+  io.emit( 
+    "game-state", 
+    gameState.currentTurnPlayerIndex,
+    gameState.phase,
+    gameState.playCount
+  );
+}
+
 io.on('connection', client => {
   function emitGameState() {
     client.emit(
@@ -32,13 +65,18 @@ io.on('connection', client => {
     )
   }
   
+
+  
+  
   console.log("New client")
   let playerIndex: number | null | "all" = null
   client.on('player-index', n => {
     playerIndex = n
     console.log("playerIndex set", n)
     client.join(String(n))
+    gameState.connectedPlayers.add(n); 
     if (typeof playerIndex === "number") {
+     
       client.emit(
         "all-cards", 
         filterCardsForPlayerPerspective(Object.values(gameState.cardsById), playerIndex).filter(card => card.locationType !== "unused"),
@@ -49,8 +87,12 @@ io.on('connection', client => {
         Object.values(gameState.cardsById),    
       )
     }
+    checkAllPlayersConnected()
     emitGameState()
+
   })
+
+
 
   client.on("action", (action: Action) => {
     if (typeof playerIndex === "number") {
