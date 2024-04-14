@@ -31,7 +31,7 @@ export interface GameState {
   currentTurnPlayerIndex: number
   phase: GamePhase
   playCount: number
-  connectedPlayers: Set<number> // 新字段，跟踪已连接的玩家的索引
+  connectedPlayers: Set<number> 
 }
 
 /**
@@ -89,7 +89,7 @@ export function distributeInitialCards(state: GameState, cardsPerPlayer: number)
       const cardId = findNextCardToDraw(state.cardsById);
       if (cardId != null) {
         const card = state.cardsById[cardId];
-        console.log(card)
+        
         moveCardToPlayer(state, card);
       }
       
@@ -97,6 +97,17 @@ export function distributeInitialCards(state: GameState, cardsPerPlayer: number)
     moveToNextPlayer(state)
   }
 
+  
+  const cardId = findNextCardToDraw(state.cardsById)
+  if (cardId != null) {
+    const card = state.cardsById[cardId]
+    moveCardToLastPlayed(state, card)
+  }
+
+
+
+
+  
 
 
   

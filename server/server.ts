@@ -1,6 +1,6 @@
 import http from "http"
 import { Server } from "socket.io"
-import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card,getLastPlayedCard,distributeInitialCards } from "./model"
+import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card,distributeInitialCards } from "./model"
 
 const server = http.createServer()
 const io = new Server(server)
