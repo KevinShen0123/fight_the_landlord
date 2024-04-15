@@ -32,7 +32,7 @@ function checkAllPlayersConnected() {
   
   if (gameState.connectedPlayers.size === gameState.playerNames.length) {
     allPlayersConnected = true
-    distributeInitialCards(gameState,3);
+    distributeInitialCards(gameState,14);
     emitCardUpdates(Object.values(gameState.cardsById), true, true);
   }
 }
