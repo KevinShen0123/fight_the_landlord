@@ -101,7 +101,7 @@ export function distributeInitialCards(state: GameState, cardsPerPlayer: number)
   const cardId = findNextCardToDraw(state.cardsById)
   if (cardId != null) {
     const card = state.cardsById[cardId]
-    moveCardToLastPlayed(state, card)
+    // moveCardToLastPlayed(state, card)
   }
 
 
@@ -250,6 +250,7 @@ export function doAction(state: GameState, action: Action): Card[] {
       // not your card
       return []
     }
+
     const lastPlayedCard = getLastPlayedCard(state.cardsById)
     if (lastPlayedCard == null) {
       return []

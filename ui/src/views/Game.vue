@@ -13,7 +13,6 @@
           :card="card"
           :includeLocation="true"
           :lastPlayedCard="lastPlayedCard"
-          @cardClick="playCard(card.id)"
         />
         
       </div>
@@ -28,7 +27,6 @@
             :card="card"
             :includeLocation="true"
             :lastPlayedCard="lastPlayedCard"
-            @cardClick="playCard(card.id)"
           />
       </div>
       </div>

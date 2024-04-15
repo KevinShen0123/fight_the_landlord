@@ -41,7 +41,7 @@
       if (props.lastPlayedCard === null) {
         return true;
       }
-      return areCompatible(props.card as any, (props as any).lastPlayedCard);
+      return true;
     });
   
     const isLastPlayedCard = computed(() => {
