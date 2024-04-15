@@ -67,7 +67,9 @@ io.on('connection', client => {
     playerIndex = n
     console.log("playerIndex set", n)
     client.join(String(n))
-    gameState.connectedPlayers.add(n); 
+    if(!(gameState.connectedPlayers.has(n))){
+      gameState.connectedPlayers.add(n); 
+    }
     if (typeof playerIndex === "number") {
      
       client.emit(
