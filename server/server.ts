@@ -66,7 +66,10 @@ io.on('connection', client => {
   client.on('player-index', n => {
     playerIndex = n
     console.log("playerIndex set", n)
+    console.log(gameState.connectedPlayers)
+    console.log(gameState.connectedPlayers.has(n))
     client.join(String(n))
+    const alreadyDistributed=gameState.connectedPlayers.has(n)
     if(!(gameState.connectedPlayers.has(n))){
       gameState.connectedPlayers.add(n); 
     }
@@ -82,7 +85,9 @@ io.on('connection', client => {
         Object.values(gameState.cardsById),    
       )
     }
-    checkAllPlayersConnected()
+    if(!alreadyDistributed||gameState.connectedPlayers.size<gameState.playerNames.length){
+      checkAllPlayersConnected()
+    }
     emitGameState()
 
   })
