@@ -6,7 +6,7 @@ const server = http.createServer()
 const io = new Server(server)
 const port = 8101
 
-let gameState = createEmptyGame(["player1", "player2"], 1, 5)
+let gameState = createEmptyGame(["player1", "player2","player3"], 1, 13)
 
 function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
@@ -114,7 +114,7 @@ io.on('connection', client => {
   })
 
   client.on("new-game", () => {
-    gameState = createEmptyGame(gameState.playerNames, 2, 2)
+    gameState = createEmptyGame(gameState.playerNames, 1, 13)
     const updatedCards = Object.values(gameState.cardsById)
     emitCardUpdates(updatedCards,true,true)
     io.to("all").emit(
