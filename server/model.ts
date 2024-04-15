@@ -104,6 +104,18 @@ export function distributeInitialCards(state: GameState, cardsPerPlayer: number)
     moveCardToLastPlayed(state, card)
   }
 
+
+
+
+  
+
+
+  
+
+  console.log("Distribute completed")
+
+
+  
 }
 
 
@@ -170,7 +182,13 @@ export interface PlayCardAction {
   cardId: CardId
 }
 
-export type Action = DrawCardAction | PlayCardAction
+export interface PlayCardsAction {
+  action: "play-cards"
+  playerIndex: number
+  cardIds: CardId[];
+}
+
+export type Action = DrawCardAction | PlayCardAction | PlayCardsAction
 
 function moveToNextPlayer(state: GameState) {
   state.currentTurnPlayerIndex = (state.currentTurnPlayerIndex + 1) % state.playerNames.length
@@ -225,6 +243,7 @@ export function doAction(state: GameState, action: Action): Card[] {
     changedCards.push(card)
   }
 
+
   if (action.action === "play-card") {
     const card = state.cardsById[action.cardId]
     if (card.playerIndex !== state.currentTurnPlayerIndex) {
@@ -242,6 +261,30 @@ export function doAction(state: GameState, action: Action): Card[] {
     moveCardToLastPlayed(state, card)
     changedCards.push(card)
   }
+
+  if (action.action === "play-cards") {
+    const cardsToPlay = action.cardIds.map(cardId => state.cardsById[cardId]);
+    console.log(cardsToPlay)
+    // 检查所有卡牌是否都属于当前玩家
+    if (!cardsToPlay.every(card => card.playerIndex === state.currentTurnPlayerIndex)) {
+      return [];  // 如果有卡牌不属于当前玩家，则不允许操作
+    }
+  
+    // 获取最后一张打出的卡牌
+    const lastPlayedCard = getLastPlayedCard(state.cardsById);
+  
+    // 检查所有卡牌是否可以基于最后打出的卡牌连续打出
+    if (lastPlayedCard && !cardsToPlay.every(card => areCompatible(card, lastPlayedCard))) {
+      return [];  // 如果有卡牌与最后打出的卡牌不兼容，则不允许操作
+    }
+  
+    // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
+    cardsToPlay.forEach(card => {
+      moveCardToLastPlayed(state, card);
+      changedCards.push(card);
+    });
+  }
+  
 
   if (state.phase === "play" && action.action !== "draw-card") {
     moveToNextPlayer(state)

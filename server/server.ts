@@ -6,7 +6,7 @@ const server = http.createServer()
 const io = new Server(server)
 const port = 8101
 
-let gameState = createEmptyGame(["player1", "player2"], 1, 13)
+let gameState = createEmptyGame(["player1", "player2"], 1, 5)
 
 function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {

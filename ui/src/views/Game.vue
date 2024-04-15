@@ -34,8 +34,6 @@
       </div>
 
 
-
- 
       <div class="bottom-container">
         <div class="your-cards">
           <h1>Your Card</h1>
@@ -46,14 +44,18 @@
             :card="card"
             :includeLocation="true"
             :lastPlayedCard="lastPlayedCard"
-            @cardClick="playCard(card.id)"
+            :selected="selectedCardIds.includes(card.id)" 
+            @cardClick="toggleCardSelection(card.id)"
           />
           </div>
         </div>
       </div>
 
+ 
+      
+
    
-    
+      <b-button class="mx-2 my-2" size="sm" @click="playSelectedCards" :disabled="!myTurn || selectedCardIds.length === 0">Play Selected Cards</b-button>  <!-- 新增按钮 -->
     
     </div>
     
@@ -76,7 +78,7 @@ const props = withDefaults(defineProps<Props>(), {
   playerIndex: "all",
 })
 
-
+const selectedCardIds = ref<CardId[]>([]);
 
 //new
 const lastPlayedCard = computed(() => {
@@ -170,6 +172,35 @@ async function applyUpdatedCards(updatedCards: Card[]) {
     }
   }
 }
+
+
+
+function toggleCardSelection(cardId: CardId) {
+ 
+  const index = selectedCardIds.value.indexOf(cardId);
+  if (index > -1) {
+    selectedCardIds.value.splice(index, 1);
+  } else {
+    selectedCardIds.value.push(cardId);
+  }
+
+  
+}
+
+async function playSelectedCards() {
+  if (selectedCardIds.value.length > 0 && typeof playerIndex === "number") {
+    const updatedCards = await doAction({
+      action: "play-cards",  // 注意这里的后端接口可能需要修改以支持多张牌
+      playerIndex,
+      cardIds: selectedCardIds.value
+    });
+    if (updatedCards.length > 0) {
+      selectedCardIds.value = [];  // 清空选中的卡片
+    } else {
+      alert("操作失败");
+    }
+  }
+}
 </script>
 
 <style>
@@ -218,5 +249,6 @@ async function applyUpdatedCards(updatedCards: Card[]) {
 .card-pile .cards-container {
   margin-top: 10px; 
 }
+
 </style>
 
