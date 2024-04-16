@@ -286,7 +286,9 @@ export function doAction(state: GameState, action: Action): Card[] {
   
     // 获取最后一张打出的卡牌
     var  lastPlayedCard = getLastPlayedCardS(state.cardsById);
-  
+    if(cardsToPlay.length!=lastPlayedCard.length&&lastPlayedCard.length>0){
+      return [];
+    }
     // 检查所有卡牌是否可以基于最后打出的卡牌连续打出
     var incompatiblecount=0
     console.log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
