@@ -195,8 +195,12 @@ export interface PlayCardsAction {
   playerIndex: number
   cardIds: CardId[];
 }
+export interface PassAction{
+  action:"Pass"
+  playerIndex:number
+}
 
-export type Action = DrawCardAction | PlayCardAction | PlayCardsAction
+export type Action = DrawCardAction | PlayCardAction | PlayCardsAction|PassAction
 
 function moveToNextPlayer(state: GameState) {
   state.currentTurnPlayerIndex = (state.currentTurnPlayerIndex + 1) % state.playerNames.length
@@ -275,6 +279,10 @@ export function doAction(state: GameState, action: Action): Card[] {
     moveCardToLastPlayed(state, card)
     changedCards.push(card)
   }
+  if(action.action ==="Pass"&&state.phase=="play"){
+   moveToNextPlayer(state)
+   return []
+  }
 
   if (action.action === "play-cards") {
     const cardsToPlay = action.cardIds.map(cardId => state.cardsById[cardId]);
@@ -294,16 +302,36 @@ export function doAction(state: GameState, action: Action): Card[] {
     console.log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
     console.log(lastPlayedCard.length+" "+state.currentTurnPlayerIndex)
     console.log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
-    lastPlayedCard.forEach(lastcard => {
-      if (lastcard && !cardsToPlay.every(card => areCompatible(card, lastcard))) {
-        incompatiblecount+=1  // 如果有卡牌与最后打出的卡牌不兼容，则不允许操作
+    if(cardsToPlay.length===lastPlayedCard.length&&lastPlayedCard.length==1){
+      console.log("1:1 Fight!")
+      var reallastplayedcard=lastPlayedCard[0]
+      var realcardtoplay=cardsToPlay[0]
+      var canPlay=false
+      if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
+         canPlay=true
+      }else if(realcardtoplay.rank==="2"&&reallastplayedcard.rank!=="2"&&reallastplayedcard.rank!="3"){
+        canPlay=true
+      }else if(realcardtoplay.rank==="A"){
+        canPlay=false
+      }else if(reallastplayedcard.rank==="3"&&realcardtoplay.rank!=="3"){
+        canPlay=false
+      }else if(reallastplayedcard.rank==="2"&&realcardtoplay.rank!=="3"&&realcardtoplay.rank!=="2"){
+        canPlay=false
+      }else if(realcardtoplay.rank==="K"&&(reallastplayedcard.rank==="Q"||reallastplayedcard.rank==="J")){
+        canPlay=true
+      }else if(realcardtoplay.rank==="Q"&&reallastplayedcard.rank==="J"){
+        canPlay=true
+      }else if(Number.isNaN(realcardtoplay.rank)&&Number.isNaN(reallastplayedcard.rank)){
+        canPlay=false
+      }else if(Number.isNaN(realcardtoplay.rank)&&!(Number.isNaN(reallastplayedcard.rank))){
+        canPlay=true
+      }else if(Number(realcardtoplay.rank)>Number(reallastplayedcard.rank)){
+        canPlay=true
       }
-    })
-    if(incompatiblecount!==0){
-      return []
-    }
-  
-    // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
+      if(!canPlay){
+        return []
+      }
+      // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
     cardsToPlay.forEach(card => {
       moveCardToLastPlayed(state, card);
       changedCards.push(card);
@@ -320,6 +348,34 @@ export function doAction(state: GameState, action: Action): Card[] {
         state.lastPlayedCards.push(lcard)
       }
     })
+    }else{
+      lastPlayedCard.forEach(lastcard => {
+        if (lastcard && !cardsToPlay.every(card => areCompatible(card, lastcard))) {
+          incompatiblecount+=1  // 如果有卡牌与最后打出的卡牌不兼容，则不允许操作
+        }
+      })
+      if(incompatiblecount!==0){
+        return []
+      }
+    
+      // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
+      cardsToPlay.forEach(card => {
+        moveCardToLastPlayed(state, card);
+        changedCards.push(card);
+      });
+      lastPlayedCard=getLastPlayedCardS(state.cardsById)
+      lastPlayedCard.forEach(lcard=>{
+        var idequalcount=0
+        state.lastPlayedCards.forEach(lastcards=>{
+          if(lastcards.id==lcard.id){
+            idequalcount+=1;
+          }
+        })
+        if(idequalcount==0){
+          state.lastPlayedCards.push(lcard)
+        }
+      })
+    }
   }
   
 

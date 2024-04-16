@@ -54,7 +54,7 @@
 
    
       <b-button class="mx-2 my-2" size="sm" @click="playSelectedCards" :disabled="!myTurn || selectedCardIds.length === 0">Play Selected Cards</b-button>  <!-- 新增按钮 -->
-    
+      <b-button :disabled="!myTurn" @click="pass">Pass</b-button>
     </div>
     
     <b-button class="mx-2 my-2" size="sm" @click="drawCard" :disabled="!myTurn">Draw Card</b-button>
@@ -132,15 +132,16 @@ socket.on("game-state", (newCurrentTurnPlayerIndex: number, newPhase: GamePhase,
   phase.value = newPhase
   playCount.value = newPlayCount
   lastPlayedCards.value=lastPlayedCardsArr
-  alert(lastPlayedCardsArr.length)
 })
 
 function doAction(action: Action) {
   return new Promise<Card[]>((resolve, reject) => {
     socket.emit("action", action)
-    socket.once("updated-cards", (updatedCards: Card[]) => {
+    if(action.action!=="Pass"){
+      socket.once("updated-cards", (updatedCards: Card[]) => {
       resolve(updatedCards)
     })
+    }
   })
 }
 
@@ -159,6 +160,11 @@ async function playCard(cardId: CardId) {
     if (updatedCards.length === 0) {
       alert("didn't work")
     }
+  }
+}
+async function pass(){
+  if(typeof playerIndex==="number"){
+     await doAction({ action: "Pass", playerIndex})
   }
 }
 
