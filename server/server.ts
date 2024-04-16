@@ -35,9 +35,22 @@ function checkAllPlayersConnected() {
     distributeInitialCards(gameState,14);
     emitCardUpdates(Object.values(gameState.cardsById), true, true);
   }
+  collectAndSendOpponentInfo();
 }
 
+function collectAndSendOpponentInfo() {
+  gameState.playerNames.forEach((_, index) => {
+    const opponentInfo = gameState.playerNames.map((name, idx) => {
+      if (idx !== index) { 
+        const cardCount = Object.values(gameState.cardsById).filter(card => 
+          card.playerIndex === idx && card.locationType === "player-hand").length;
+        return { name, cardCount };
+      }
+    }).filter(info => info); 
 
+    io.to(String(index)).emit("opponent-info", opponentInfo);
+  });
+}
 
 function emitAllGameState() {
   io.emit( 
@@ -114,6 +127,7 @@ io.on('connection', client => {
       gameState.playCount,
       gameState.lastPlayedCards
     )
+    collectAndSendOpponentInfo();
   })
 
   client.on("new-game", () => {
@@ -131,6 +145,7 @@ io.on('connection', client => {
       gameState.playCount,
       gameState.lastPlayedCards
     )
+    collectAndSendOpponentInfo();
   })
 })
 server.listen(port)

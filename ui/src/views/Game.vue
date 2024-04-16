@@ -3,7 +3,7 @@
     <b-button class="mx-2 my-2" size="sm" @click="socket.emit('new-game')">New Game</b-button>
     <b-badge class="mr-2 mb-2" :variant="myTurn ? 'primary' : 'secondary'">turn: {{ currentTurnPlayerIndex }}</b-badge>
     <b-badge class="mr-2 mb-2">{{ phase }}</b-badge>
-    
+    <b-button class="mx-2 my-2" size="sm" @click="drawCard" :disabled="!myTurn">Draw Card</b-button>
     <div class = "container">
       <div class="unused-cards">
         <h1>Unused Card</h1>
@@ -13,6 +13,7 @@
           :card="card"
           :includeLocation="true"
           :lastPlayedCard="lastPlayedCard"
+          @cardClick="playCard(card.id)"
         />
         
       </div>
@@ -22,17 +23,19 @@
       <h1>Card Pile</h1>
       <div class="cards-container">
         <AnimatedCard
-            v-for="card in lplaycards"
+            v-for="card in lastPlayedCards"
             :key="card.id"
             :card="card"
             :includeLocation="true"
             :lastPlayedCard="lastPlayedCard"
+            @cardClick="playCard(card.id)"
           />
       </div>
       </div>
 
 
-      <div class="bottom-container">
+
+      <!-- <div class="bottom-container">
         <div class="your-cards">
           <h1>Your Card</h1>
           <div class="cards-container">
@@ -47,17 +50,49 @@
           />
           </div>
         </div>
-      </div>
+      </div> -->
+      <div class="play-board">
+        <div class="opponent-info left-opponent">
+          <!-- Left opponent's info -->
+          <div v-if="opponents[0]" class="opponent" @click="chatWith(opponents[0].name, opponents[0].cardCount)">
+            <b-badge variant="info">{{ opponents[0].name }}</b-badge>
+            <b-badge variant="warning">Cards: {{ opponents[0].cardCount }}</b-badge>
+          </div>
+        </div>
 
- 
+        <div class="your-cards">
+          <h1>Your Card</h1>
+          <div class="cards-container">
+            <AnimatedCard
+            v-for="card in playerHandCards"
+            :key="card.id"
+            :card="card"
+            :includeLocation="true"
+            :lastPlayedCard="lastPlayedCard"
+            :selected="selectedCardIds.includes(card.id)" 
+            @cardClick="toggleCardSelection(card.id)"
+          />
+          </div>
+
+          <div class="button-container">
+               <b-button size="sm" @click="playSelectedCards" :disabled="!myTurn || selectedCardIds.length === 0">Play Selected Cards</b-button> 
+               <b-button :disabled="!myTurn" @click="pass">Pass</b-button>
+          </div>
+          
+         
+        </div>
+        
       
 
-   
-      <b-button class="mx-2 my-2" size="sm" @click="playSelectedCards" :disabled="!myTurn || selectedCardIds.length === 0">Play Selected Cards</b-button>  <!-- 新增按钮 -->
-      <b-button :disabled="!myTurn" @click="pass">Pass</b-button>
-    </div>
-    
-    <b-button class="mx-2 my-2" size="sm" @click="drawCard" :disabled="!myTurn">Draw Card</b-button>
+        <div class="opponent-info right-opponent">
+          <!-- Right opponent's info -->
+          <div v-if="opponents[1]" class="opponent" @click="chatWith(opponents[1].name, opponents[1].cardCount)">
+            <b-badge variant="info">{{ opponents[1].name }}</b-badge>
+            <b-badge variant="warning">Cards: {{ opponents[1].cardCount }}</b-badge>
+          </div>
+        </div>
+      </div>
+    </div> 
   </div>
 </template>
 
@@ -101,7 +136,7 @@ const lplaycards= computed(() => {
 
 
 
-
+const opponents = ref([{ name: '123', cardCount: 0 }, { name: '234', cardCount: 0 }]);
 const socket = io()
 let x = props.playerIndex
 let playerIndex: number | "all" = parseInt(x) >= 0 ? parseInt(x) : "all"
@@ -118,6 +153,10 @@ const phase = ref("")
 const playCount = ref(-1)
 const lastPlayedCards:Ref<Card[]>=ref([])
 const myTurn = computed(() => currentTurnPlayerIndex.value === playerIndex && phase.value !== "game-over")
+socket.on("opponent-info", (opponentInfo) => {
+ 
+ opponents.value = opponentInfo;
+});
 socket.on("all-cards", (allCards: Card[]) => {
   cards.value = allCards
 })
@@ -191,7 +230,9 @@ function toggleCardSelection(cardId: CardId) {
 
   
 }
-
+function chatWith(opponentName:string, cardCount:number) {
+  alert(`Opponent: ${opponentName} - Cards: ${cardCount}`);
+}
 async function playSelectedCards() {
   if (selectedCardIds.value.length > 0 && typeof playerIndex === "number") {
     const updatedCards = await doAction({
@@ -212,9 +253,10 @@ async function playSelectedCards() {
 .container {
   display: flex;
   flex-direction: column;
-  height: 85vh; 
-  justify-content: space-between; 
-  padding: 10px 0; 
+  justify-content: space-between;
+  height: auto; /* 改为自动高度以适应内容 */
+  min-height: 85vh; /* 至少保持原有高度 */
+  overflow: visible; /* 确保内容可以显示 */
 }
 
 .title {
@@ -224,6 +266,7 @@ async function playSelectedCards() {
 .cards-container {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   margin-top: 20px; 
@@ -246,14 +289,86 @@ async function playSelectedCards() {
   margin-bottom: 10px; /* This is the actual margin that creates space between the title and the cards */
 }
 
-.bottom-container .cards-container {
-  margin-top: 10px; 
+.card-pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  margin-top: 20px; 
+}
+
+.card-pile h1 {
+  text-align: center; 
+  margin-bottom: 10px; 
 }
 
 
-.card-pile .cards-container {
-  margin-top: 10px; 
+
+
+.play-board {
+  display: flex;
+  justify-content: space-between; 
+  align-items: flex-start;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
 }
+
+.opponent-info {
+  width: 150px; 
+  flex-shrink: 0; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.opponent {
+  display: flex;
+  flex-direction: column; 
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.left-opponent {
+  margin-right: auto; 
+}
+
+.right-opponent {
+  margin-left: auto; 
+}
+
+.your-cards {
+  flex-grow: 1; 
+  display: flex;
+  flex-direction: column; /* 添加这一行来堆叠子元素 */
+  align-items: center; /* 中心对齐子元素 */
+  margin-bottom: 5px; /* 确保与下方内容有足够的间距 */
+}
+
+
+.your-cards h1 {
+  margin-bottom: 20px; /* 分隔标题和卡牌 */
+}
+
+.your-cards .cards-container {
+  display: flex;
+  justify-content: flex-start; /* 对齐到容器的起始位置 */
+  flex-wrap: wrap; /* 允许卡牌换行 */
+  gap: 10px;
+  height: 240px; /* 设置固定高度以确保有两行的空间 */
+  align-content: flex-start; /* 垂直方向上对齐到起始边缘 */
+}
+
+
+.your-cards .button-container {
+  display: flex;
+  justify-content: center; /* 居中按钮 */
+  margin-top: 20px; /* 从卡牌区域向下留出一些空间 */
+}
+
 
 </style>
-
