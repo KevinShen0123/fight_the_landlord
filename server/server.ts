@@ -7,7 +7,7 @@ const io = new Server(server)
 const port = 8101
 
 let gameState = createEmptyGame(["player1", "player2","player3"], 1, 13)
-
+var rolelist=["Landlord","Peasant","Peasant"]
 function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
     let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(cards, i);

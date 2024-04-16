@@ -70,7 +70,6 @@ import AnimatedCard from "./AnimatedCard.vue"
 interface Props {
   playerIndex?: string
 }
-
 // default values for props
 const props = withDefaults(defineProps<Props>(), {
   playerIndex: "all",
@@ -108,17 +107,17 @@ let x = props.playerIndex
 let playerIndex: number | "all" = parseInt(x) >= 0 ? parseInt(x) : "all"
 console.log("playerIndex", JSON.stringify(playerIndex))
 socket.emit("player-index", playerIndex)
-
+if(playerIndex==0){
+  alert("Landlord")
+}else{
+  alert("peasant")
+}
 const cards: Ref<Card[]> = ref([])
 const currentTurnPlayerIndex = ref(-1)
 const phase = ref("")
 const playCount = ref(-1)
 const lastPlayedCards:Ref<Card[]>=ref([])
 const myTurn = computed(() => currentTurnPlayerIndex.value === playerIndex && phase.value !== "game-over")
-
-
-
-
 socket.on("all-cards", (allCards: Card[]) => {
   cards.value = allCards
 })

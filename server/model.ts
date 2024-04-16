@@ -341,7 +341,23 @@ export function doAction(state: GameState, action: Action): Card[] {
     // 获取最后一张打出的卡牌
     var  lastPlayedCard = getLastPlayedCardS(state.cardsById);
     if(cardsToPlay.length!=lastPlayedCard.length&&lastPlayedCard.length>0){
+      console.log("length not equal!!!!!!!!!!")
+      var indexallsame=true
+      for(var x=0;x<cardsToPlay.length;x++){
+        for(var h=0;h<lastPlayedCard.length;h++){
+          if(lastPlayedCard[h].playerIndex!==cardsToPlay[x].playerIndex){
+            console.log("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+            console.log(lastPlayedCard[h].playerIndex)
+            console.log(cardsToPlay[x].playerIndex)
+            indexallsame=false
+            break
+          }
+        }
+      }
+      console.log("index all same not equal?"+indexallsame)
+      if(!indexallsame){
       return [];
+      }
     }
     // 检查所有卡牌是否可以基于最后打出的卡牌连续打出
     var incompatiblecount=0
@@ -399,6 +415,20 @@ export function doAction(state: GameState, action: Action): Card[] {
           moveCardToLastPlayed(state, card);
           changedCards.push(card);
         });
+        var indexallsame=true
+        for(var m=0;m<cardsToPlay.length;m++){
+          if(cardsToPlay[m].playerIndex!==lastPlayedCard[m].playerIndex){
+            indexallsame=false
+            break
+          }
+        }
+        console.log("index all same????????"+indexallsame)
+        if(indexallsame){
+          for(var n=0;n<lastPlayedCard.length;n++){
+              lastPlayedCard[n].locationType="unused"
+          }
+        }
+        console.log(getLastPlayedCardS(state.cardsById).length)
         lastPlayedCard=getLastPlayedCardS(state.cardsById)
         lastPlayedCard.forEach(lcard=>{
           var idequalcount=0
@@ -500,20 +530,35 @@ export function doAction(state: GameState, action: Action): Card[] {
         })
       }
     }else{
-      lastPlayedCard.forEach(lastcard => {
-        if (lastcard && !cardsToPlay.every(card => areCompatible(card, lastcard))) {
-          incompatiblecount+=1  // 如果有卡牌与最后打出的卡牌不兼容，则不允许操作
-        }
-      })
-      if(incompatiblecount!==0){
-        return []
-      }
+      // lastPlayedCard.forEach(lastcard => {
+      //   if (lastcard && !cardsToPlay.every(card => areCompatible(card, lastcard))) {
+      //     incompatiblecount+=1  // 如果有卡牌与最后打出的卡牌不兼容，则不允许操作
+      //   }
+      // })
+      // if(incompatiblecount!==0){
+      //   return []
+      // }
     
       // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
       cardsToPlay.forEach(card => {
         moveCardToLastPlayed(state, card);
         changedCards.push(card);
       });
+      var indexallsame=true
+      for(var m=0;m<cardsToPlay.length&&lastPlayedCard.length>0;m++){
+        console.log(cardsToPlay[m])
+        console.log(lastPlayedCard.length)
+        if(cardsToPlay[m].playerIndex!==lastPlayedCard[m].playerIndex){
+          indexallsame=false
+          break
+        }
+      }
+      console.log("index all same????????"+indexallsame)
+      if(indexallsame){
+        for(var n=0;n<lastPlayedCard.length;n++){
+            lastPlayedCard[n].locationType="unused"
+        }
+      }
       lastPlayedCard=getLastPlayedCardS(state.cardsById)
       lastPlayedCard.forEach(lcard=>{
         var idequalcount=0
