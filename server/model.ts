@@ -236,10 +236,21 @@ function moveCardToLastPlayed({ currentTurnPlayerIndex, cardsById }: GameState, 
 }
 function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
   var canPlay=false
+  if(realcardtoplay.rank==="3"&&reallastplayedcard.rank==="3"){
+    canPlay=true
+    return canPlay
+   }
   if(realcardtoplay.playerIndex===reallastplayedcard.playerIndex){
     canPlay=true
     return canPlay
   }
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    console.log(realcardtoplay.rank)
+    console.log(Number(realcardtoplay.rank))
+    console.log(Number.isNaN(Number(realcardtoplay.rank)))
+    console.log(Number.isNaN(reallastplayedcard.rank))
+    console.log(Number.isNaN(realcardtoplay.rank)&&!(Number.isNaN(reallastplayedcard.rank)))
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
       if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
          canPlay=true
       }else if(realcardtoplay.rank==="2"&&reallastplayedcard.rank!=="2"&&reallastplayedcard.rank!="3"){
@@ -254,9 +265,9 @@ function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
         canPlay=true
       }else if(realcardtoplay.rank==="Q"&&reallastplayedcard.rank==="J"){
         canPlay=true
-      }else if(Number.isNaN(realcardtoplay.rank)&&Number.isNaN(reallastplayedcard.rank)){
+      }else if(Number.isNaN(Number(realcardtoplay.rank))&&Number.isNaN(Number(reallastplayedcard.rank))){
         canPlay=false
-      }else if(Number.isNaN(realcardtoplay.rank)&&!(Number.isNaN(reallastplayedcard.rank))){
+      }else if(Number.isNaN(Number(realcardtoplay.rank))&&!(Number.isNaN(Number(reallastplayedcard.rank)))){
         canPlay=true
       }else if(Number(realcardtoplay.rank)>Number(reallastplayedcard.rank)){
         canPlay=true
@@ -343,7 +354,7 @@ export function doAction(state: GameState, action: Action): Card[] {
       moveCardToLastPlayed(state, card);
       changedCards.push(card);
     });
-    if(cardsToPlay[0].rank===lastPlayedCard[0].rank&&cardsToPlay[0].playerIndex===lastPlayedCard[0].playerIndex){
+    if(cardsToPlay[0].playerIndex===lastPlayedCard[0].playerIndex){
       lastPlayedCard[0].locationType="unused"
     }
     lastPlayedCard=getLastPlayedCardS(state.cardsById)
