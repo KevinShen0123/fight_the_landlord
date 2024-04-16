@@ -240,6 +240,11 @@ function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
     canPlay=true
     return canPlay
    }
+   if(realcardtoplay.rank==="A"&&reallastplayedcard.rank==="A"){
+    canPlay=true
+    return canPlay
+   }
+
   if(realcardtoplay.playerIndex===reallastplayedcard.playerIndex){
     canPlay=true
     return canPlay
@@ -249,7 +254,7 @@ function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
     console.log(Number(realcardtoplay.rank))
     console.log(Number.isNaN(Number(realcardtoplay.rank)))
     console.log(Number.isNaN(reallastplayedcard.rank))
-    console.log(Number.isNaN(realcardtoplay.rank)&&!(Number.isNaN(reallastplayedcard.rank)))
+    console.log(Number.isNaN(Number(realcardtoplay.rank))&&!(Number.isNaN(reallastplayedcard.rank)))
     console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
       if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
          canPlay=true
@@ -265,11 +270,13 @@ function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
         canPlay=true
       }else if(realcardtoplay.rank==="Q"&&reallastplayedcard.rank==="J"){
         canPlay=true
-      }else if(Number.isNaN(Number(realcardtoplay.rank))&&Number.isNaN(Number(reallastplayedcard.rank))){
+      }else if(Number.isNaN(Number(realcardtoplay.rank))&&Number.isNaN(Number(reallastplayedcard.rank))&&reallastplayedcard.rank!="A"){
         canPlay=false
       }else if(Number.isNaN(Number(realcardtoplay.rank))&&!(Number.isNaN(Number(reallastplayedcard.rank)))){
         canPlay=true
       }else if(Number(realcardtoplay.rank)>Number(reallastplayedcard.rank)){
+        canPlay=true
+      }else if(reallastplayedcard.rank==="A"){
         canPlay=true
       }
       return canPlay
