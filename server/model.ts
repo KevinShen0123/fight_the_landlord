@@ -236,6 +236,10 @@ function moveCardToLastPlayed({ currentTurnPlayerIndex, cardsById }: GameState, 
 }
 function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
   var canPlay=false
+  if(realcardtoplay.playerIndex===reallastplayedcard.playerIndex){
+    canPlay=true
+    return canPlay
+  }
       if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
          canPlay=true
       }else if(realcardtoplay.rank==="2"&&reallastplayedcard.rank!=="2"&&reallastplayedcard.rank!="3"){
@@ -339,6 +343,9 @@ export function doAction(state: GameState, action: Action): Card[] {
       moveCardToLastPlayed(state, card);
       changedCards.push(card);
     });
+    if(cardsToPlay[0].rank===lastPlayedCard[0].rank&&cardsToPlay[0].playerIndex===lastPlayedCard[0].playerIndex){
+      lastPlayedCard[0].locationType="unused"
+    }
     lastPlayedCard=getLastPlayedCardS(state.cardsById)
     lastPlayedCard.forEach(lcard=>{
       var idequalcount=0
