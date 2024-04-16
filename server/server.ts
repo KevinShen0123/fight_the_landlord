@@ -12,10 +12,20 @@ import { Issuer, Strategy, generators } from 'openid-client'
 import passport from 'passport'
 import { gitlab } from "./secrets"
 import { User } from "./data"
+import { Strategy as CustomStrategy } from "passport-custom"
+import cors from "cors"
+//new added on 4/16
+const HOST = process.env.HOST || "127.0.0.1"
 
+const DISABLE_SECURITY = process.env.DISABLE_SECURITY
+
+
+const passportStrategies = [
+  ...(DISABLE_SECURITY ? ["disable-security"] : []),
+  "oidc",
+]
 
 const ADMIN_GROUP_ID = "fight-admin"
-
 
 // set up Mongo
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
@@ -39,10 +49,10 @@ const logger = pino({
 app.use(expressPinoLogger({ logger }))
 
 // set up CORS
-// app.use(cors({
-//   origin: "http://127.0.0.1:" + port,
-//   credentials: true,
-// }))
+app.use(cors({
+  origin: "http://127.0.0.1:" + port,
+  credentials: true,
+}))
 
 // set up session
 const sessionMiddleware = session({
@@ -69,10 +79,26 @@ passport.serializeUser((user, done) => {
   console.log("serializeUser", user)
   done(null, user)
 })
-passport.deserializeUser((user, done) => {
+passport.deserializeUser((user: any, done) => {
   console.log("deserializeUser", user)
   done(null, user)
 })
+
+app.get(
+  "/api/login", 
+  passport.authenticate(passportStrategies, { failureRedirect: "/api/login" }), 
+  (req, res) => res.redirect("/")
+
+  
+)
+
+app.get(
+  "/login-callback",
+  passport.authenticate(passportStrategies, {
+    successRedirect: "/",
+    failureRedirect: "/api/login",
+  })
+)    
 
 // set up Socket.IO
 const io = new Server(server)
@@ -82,7 +108,7 @@ const wrap = (middleware: any) => (socket: any, next: any) => middleware(socket.
 io.use(wrap(sessionMiddleware))
 
 // hard-coded game configuration
-const playerUserIds = ["jx133","ks713"]
+const playerUserIds = ["jx133","qingli"]
 let gameState = createEmptyGame(playerUserIds, 1, 2)
 
 function emitUpdatedCardsForPlayers(cards: Card[], newGame = false) {
@@ -223,11 +249,11 @@ function checkRole(requiredRoles: string[]) {
 }
 
 //specfic API for Player
-app.get('/api/settings/:username', checkAuthenticated, checkRole(["Player"]), async (req, res) => {
-  const username = req.params.username
+app.get('/api/settings/:preferred_username', checkAuthenticated, checkRole(["Player"]), async (req, res) => {
+  const preferred_username = req.params.preferred_username
 
   try {
-    const userSettings = await db.collection('users').findOne({ username: username });
+    const userSettings = await db.collection('users').findOne({ preferred_username: preferred_username });
     console.log("Settings")
     console.log(userSettings)
     if (!userSettings) {
@@ -242,11 +268,11 @@ app.get('/api/settings/:username', checkAuthenticated, checkRole(["Player"]), as
 });
 
 
-app.put('/api/settings/:username', checkAuthenticated, checkRole(["Player"]),async (req, res) => {
+app.put('/api/settings/:preferred_username', checkAuthenticated, checkRole(["Player"]),async (req, res) => {
 
 
   
-  const username = req.params.username;
+  const preferred_username = req.params.preferred_username;
   const score = Number(req.body.score);
   const gamesPlayed = Number(req.body.gamesPlayed);
   const gamesWon = Number(req.body.gamesWon);
@@ -257,7 +283,7 @@ app.put('/api/settings/:username', checkAuthenticated, checkRole(["Player"]),asy
 
     
     const updateResult = await db.collection('users').updateOne(
-      { username: username },
+      { preferred_username: preferred_username },
       {
         $set: {
           score, 
@@ -319,12 +345,12 @@ app.get('/api/statistics/users', checkAuthenticated, checkRole(['Admin']), async
   }
 });
 
-app.post('/api/user/:username/clear', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
-  const { username } = req.params;
+app.post('/api/user/:preferred_username/clear', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+  const { preferred_username } = req.params;
 
   try {
     const updateResult = await db.collection('users').updateOne(
-      { username: username },
+      { preferred_username: preferred_username },
       {
         $set: {
           gamesPlayed: 0,
@@ -348,45 +374,27 @@ app.post('/api/user/:username/clear', checkAuthenticated, checkRole(['Admin']), 
     }
 
 
-    res.json({ message: `User ${username}'s data reset successfully` });
+    res.json({ message: `User ${preferred_username}'s data reset successfully` });
   } catch (error) {
     console.error('Error resetting user data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 // connect to Mongo
-client.connect().then(() => {
+client.connect().then(async () => {
   logger.info('connected successfully to MongoDB')
   db = client.db("fightTheLandlord")
 
-  Issuer.discover("https://coursework.cs.duke.edu/").then(issuer => {
-    const client = new issuer.Client(gitlab)
-  
-    const params = {
-      scope: 'openid profile email',
-      nonce: generators.nonce(),
-      redirect_uri: 'http://localhost:8221/login-callback',
-      state: generators.state(),
-    }
-  
-    function verify(tokenSet: any, userInfo: any, done: (error: any, user: any) => void) {
-      console.log('userInfo', userInfo)
-      userInfo.roles = userInfo.groups.includes(ADMIN_GROUP_ID) ? ["Admin"] : ["Player"]
-      console.log('tokenSet', tokenSet)
-      console.log('AfteruserInfo', userInfo)
 
-      
-
-
-      const username = userInfo.name
+  passport.use("disable-security", new CustomStrategy((req, done) => {
+    if (req.query.key !== DISABLE_SECURITY) {
+      console.log("you must supply ?key=" + DISABLE_SECURITY + " to log in via DISABLE_SECURITY")
+      done(null, false)
+    } else {
+      const db_preferred_username = req.query.user as string
       const usersCollection = db.collection('users')
-
-      console.log("username is ", username)
-
-
-
       const result = usersCollection.updateOne(
-        { username: username }, 
+        { preferred_username:  db_preferred_username }, 
         { 
           $setOnInsert: {
             score: 0,
@@ -401,32 +409,68 @@ client.connect().then(() => {
       )
 
       console.log("Insert successfully")
-      
+      done(null, { preferred_username: req.query.user, roles: [].concat(req.query.role) })
+    }
+    
+    
+  }))
+  
+  {
+    const issuer = await Issuer.discover("https://coursework.cs.duke.edu/")
+    const client = new issuer.Client(gitlab)
+
+    
+    const params = {
+      scope: 'openid profile email',
+      nonce: generators.nonce(),
+      redirect_uri: 'http://localhost:8221/login-callback',
+      state: generators.state(),
+    }
+    
+    function verify(tokenSet: any, userInfo: any, done: (error: any, user: any) => void) {
+      console.log('userInfo', userInfo)
+      console.log('tokenSet', tokenSet)
+      userInfo.roles = userInfo.groups.includes(ADMIN_GROUP_ID) ? ["Admin"] : ["Player"]
+      const db_preferred_username = userInfo.preferred_username
+      const usersCollection = db.collection('users')
+
+
+
+      const result = usersCollection.updateOne(
+        { preferred_username:  db_preferred_username }, 
+        { 
+          $setOnInsert: {
+            score: 0,
+            gamesPlayed: 0,
+            gamesWon: 0,
+            totalPlayTime: 0,
+            personalInformation:""
+          },
+          $set: { lastLogin: new Date() }
+        },
+        { upsert: true } 
+      )
+
+      console.log("Insert successfully")
       return done(null, userInfo)
     }
-  
+
+    
     passport.use('oidc', new Strategy({ client, params }, verify))
 
-    app.get(
-      "/api/login", 
-      passport.authenticate("oidc", { failureRedirect: "/api/login" }), 
-      (req, res) => res.redirect("/")
-      
-    )
-    
-    app.get(
-      "/login-callback",
-      passport.authenticate("oidc", {
-        successRedirect: "/",
-        failureRedirect: "/api/login",
-      })
-    )    
+  
+
+  }
+  
+  
+
+
 
 
     
-
+    
     // start server
     server.listen(port)
     logger.info(`Game server listening on port ${port}`)
   })
-})
+
