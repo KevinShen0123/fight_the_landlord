@@ -22,7 +22,7 @@
       <h1>Card Pile</h1>
       <div class="cards-container">
         <AnimatedCard
-            v-for="card in lastPlayedCards"
+            v-for="card in lplaycards"
             :key="card.id"
             :card="card"
             :includeLocation="true"
@@ -84,11 +84,6 @@ const lastPlayedCard = computed(() => {
   return result.length > 0 ? result[0] : null;
 });
 
-const lastPlayedCards = computed(() => {
-  const result = cards.value.filter(card => card.locationType === 'last-card-played');
-  return result.length > 0 ? result : null;
-});
-
 
 
 const playerHandCards = computed(() => {
@@ -97,9 +92,14 @@ const playerHandCards = computed(() => {
 });
 
 const unusedCards = computed(() => {
-  const result =  cards.value.filter(card => card.locationType === 'unused');
+  const result =  lastPlayedCards.value.filter(card => card.locationType === 'unused');
   return result.length > 0 ? result : null;
 });
+const lplaycards= computed(() => {
+  const result =  lastPlayedCards.value.filter(card => card.locationType === 'last-card-played');
+  return result.length > 0 ? result : null;
+});
+
 
 
 
@@ -113,7 +113,7 @@ const cards: Ref<Card[]> = ref([])
 const currentTurnPlayerIndex = ref(-1)
 const phase = ref("")
 const playCount = ref(-1)
-
+const lastPlayedCards:Ref<Card[]>=ref([])
 const myTurn = computed(() => currentTurnPlayerIndex.value === playerIndex && phase.value !== "game-over")
 
 
@@ -127,10 +127,12 @@ socket.on("updated-cards", (updatedCards: Card[]) => {
   applyUpdatedCards(updatedCards)
 })
 
-socket.on("game-state", (newCurrentTurnPlayerIndex: number, newPhase: GamePhase, newPlayCount: number) => {
+socket.on("game-state", (newCurrentTurnPlayerIndex: number, newPhase: GamePhase, newPlayCount: number,lastPlayedCardsArr:Card[]) => {
   currentTurnPlayerIndex.value = newCurrentTurnPlayerIndex
   phase.value = newPhase
   playCount.value = newPlayCount
+  lastPlayedCards.value=lastPlayedCardsArr
+  alert(lastPlayedCardsArr.length)
 })
 
 function doAction(action: Action) {

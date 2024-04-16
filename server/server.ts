@@ -44,7 +44,8 @@ function emitAllGameState() {
     "game-state", 
     gameState.currentTurnPlayerIndex,
     gameState.phase,
-    gameState.playCount
+    gameState.playCount,
+    gameState.lastPlayedCards,
   );
 }
 
@@ -54,7 +55,8 @@ io.on('connection', client => {
       "game-state", 
       gameState.currentTurnPlayerIndex,
       gameState.phase,
-      gameState.playCount
+      gameState.playCount,
+      gameState.lastPlayedCards
     )
   }
   
@@ -109,7 +111,8 @@ io.on('connection', client => {
       "game-state", 
       gameState.currentTurnPlayerIndex,
       gameState.phase,
-      gameState.playCount
+      gameState.playCount,
+      gameState.lastPlayedCards
     )
   })
 
@@ -125,7 +128,8 @@ io.on('connection', client => {
       "game-state", 
       gameState.currentTurnPlayerIndex,
       gameState.phase,
-      gameState.playCount
+      gameState.playCount,
+      gameState.lastPlayedCards
     )
   })
 })
