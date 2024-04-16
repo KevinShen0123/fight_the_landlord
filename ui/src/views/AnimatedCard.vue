@@ -3,9 +3,10 @@
       class="animated-card"
       :class="{'illegal': !isLegalToPlay,
                 'last-played' : isLastPlayedCard,
-                'unused' : unused
+                'unused' : unused,
+                'selected-card': isSelected  
         }"
-      @click="$emit('cardClick', card?.id)"
+      @click="handleClick"
       :title="'[' + paddedCardId + '] '"
       border-variant="primary"
       body-class="card-info"
@@ -21,20 +22,20 @@
     </b-card>
   </template>
     
-    <script setup lang="ts">
+<script setup lang="ts">
     import { computed,PropType} from 'vue';
     import { areCompatible,Card } from "../../../server/model"
-  
+    const emit = defineEmits(['cardClick']);
     const props = defineProps({
-  card: Object as PropType<Card | null | undefined>,
-  lastPlayedCard: Object as PropType<Card | null | undefined>,
-  includeLocation: Boolean,
- 
-});
+        card: Object as PropType<Card | null | undefined>,
+        lastPlayedCard: Object as PropType<Card | null | undefined>,
+        includeLocation: Boolean,
+        selected: Boolean 
+    });
     
-const cardDisplayText = computed(() => {
-  return props.card ? `${props.card.rank}${props.card.suit}` : '';
-});
+    const cardDisplayText = computed(() => {
+      return props.card ? `${props.card.rank}${props.card.suit}` : '';
+    });
       // Computed property to check if the card is legal to play
     const isLegalToPlay = computed(() => {
       if (props.lastPlayedCard === null) {
@@ -59,13 +60,26 @@ const cardDisplayText = computed(() => {
       }
       return id;
     });
-    </script>
+
+    const isSelected = computed(() => 
+    {
+      return props.selected
+    });
+
+    const handleClick = () => {
+      if (isLegalToPlay.value) {
+        emit('cardClick', props.card?.id);
+      } else {
+        console.log('Attempted to select an illegal card.');
+      }
+    };
+</script>
   
   <style>
   .animated-card {
     flex: 0 1 90px; 
-    max-width: 90px; 
-    height: 135px;
+    max-width: 80px; 
+    height: 120px;
     display: flex;
     flex-direction: column;
     justify-content: center; /* Center children vertically */
@@ -104,4 +118,8 @@ const cardDisplayText = computed(() => {
     font-size: 2em; 
     font-weight: bold; 
   }
+  .selected-card {
+  border: 2px solid rgb(6, 6, 4);  
+  background-color: #fd0808;  
+}
   </style>

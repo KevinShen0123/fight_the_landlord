@@ -6,7 +6,7 @@ const server = http.createServer()
 const io = new Server(server)
 const port = 8101
 
-let gameState = createEmptyGame(["player1", "player2","player3"], 1, 13)
+let gameState = createEmptyGame(["player1", "player2","player3"], 1, 8)
 
 function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
@@ -32,12 +32,27 @@ function checkAllPlayersConnected() {
   
   if (gameState.connectedPlayers.size === gameState.playerNames.length) {
     allPlayersConnected = true
-    distributeInitialCards(gameState,14);
+    distributeInitialCards(gameState,3);
     emitCardUpdates(Object.values(gameState.cardsById), true, true);
+    //new add 4/15
+    collectAndSendOpponentInfo();
   }
 }
 
+//new add 4/15
+function collectAndSendOpponentInfo() {
+  gameState.playerNames.forEach((_, index) => {
+    const opponentInfo = gameState.playerNames.map((name, idx) => {
+      if (idx !== index) { 
+        const cardCount = Object.values(gameState.cardsById).filter(card => 
+          card.playerIndex === idx && card.locationType === "player-hand").length;
+        return { name, cardCount };
+      }
+    }).filter(info => info); 
 
+    io.to(String(index)).emit("opponent-info", opponentInfo);
+  });
+}
 
 function emitAllGameState() {
   io.emit( 
@@ -104,10 +119,12 @@ io.on('connection', client => {
       gameState.phase,
       gameState.playCount
     )
+    //new add 4/15
+    collectAndSendOpponentInfo();
   })
 
   client.on("new-game", () => {
-    gameState = createEmptyGame(gameState.playerNames, 1, 13)
+    gameState = createEmptyGame(gameState.playerNames, 2, 2)
     const updatedCards = Object.values(gameState.cardsById)
     emitCardUpdates(updatedCards,true,true)
     io.to("all").emit(
@@ -120,6 +137,8 @@ io.on('connection', client => {
       gameState.phase,
       gameState.playCount
     )
+    //new add 4/15
+    collectAndSendOpponentInfo();
   })
 })
 server.listen(port)

@@ -3,7 +3,7 @@
     <b-button class="mx-2 my-2" size="sm" @click="socket.emit('new-game')">New Game</b-button>
     <b-badge class="mr-2 mb-2" :variant="myTurn ? 'primary' : 'secondary'">turn: {{ currentTurnPlayerIndex }}</b-badge>
     <b-badge class="mr-2 mb-2">{{ phase }}</b-badge>
-    
+    <b-button class="mx-2 my-2" size="sm" @click="drawCard" :disabled="!myTurn">Draw Card</b-button>
     <div class = "container">
       <div class="unused-cards">
         <h1>Unused Card</h1>
@@ -24,7 +24,6 @@
       <div class="cards-container">
         <AnimatedCard
             v-for="card in lastPlayedCards"
-            :class="card.id"
             :key="card.id"
             :card="card"
             :includeLocation="true"
@@ -36,8 +35,7 @@
 
 
 
- 
-      <div class="bottom-container">
+      <!-- <div class="bottom-container">
         <div class="your-cards">
           <h1>Your Card</h1>
           <div class="cards-container">
@@ -47,19 +45,53 @@
             :card="card"
             :includeLocation="true"
             :lastPlayedCard="lastPlayedCard"
-            @cardClick="setcanplayCard(card.id)"
+            :selected="selectedCardIds.includes(card.id)" 
+            @cardClick="toggleCardSelection(card.id)"
           />
           </div>
-          <button @click="playcards(cardIds)" :disabled="!canPlayCard">Play Cards</button>
+        </div>
+      </div> -->
+      <div class="play-board">
+        <div class="opponent-info left-opponent">
+          <!-- Left opponent's info -->
+          <div v-if="opponents[0]" class="opponent" @click="chatWith(opponents[0].name, opponents[0].cardCount)">
+            <b-badge variant="info">{{ opponents[0].name }}</b-badge>
+            <b-badge variant="warning">Cards: {{ opponents[0].cardCount }}</b-badge>
+          </div>
+        </div>
+
+        <div class="your-cards">
+          <h1>Your Card</h1>
+          <div class="cards-container">
+            <AnimatedCard
+            v-for="card in playerHandCards"
+            :key="card.id"
+            :card="card"
+            :includeLocation="true"
+            :lastPlayedCard="lastPlayedCard"
+            :selected="selectedCardIds.includes(card.id)" 
+            @cardClick="toggleCardSelection(card.id)"
+          />
+          </div>
+
+          <div class="button-container">
+               <b-button size="sm" @click="playSelectedCards" :disabled="!myTurn || selectedCardIds.length === 0">Play Selected Cards</b-button> 
+          </div>
+          
+         
+        </div>
+        
+      
+
+        <div class="opponent-info right-opponent">
+          <!-- Right opponent's info -->
+          <div v-if="opponents[1]" class="opponent" @click="chatWith(opponents[1].name, opponents[1].cardCount)">
+            <b-badge variant="info">{{ opponents[1].name }}</b-badge>
+            <b-badge variant="warning">Cards: {{ opponents[1].cardCount }}</b-badge>
+          </div>
         </div>
       </div>
-
-   
-    
-    
-    </div>
-    
-    <b-button class="mx-2 my-2" size="sm" @click="drawCard" :disabled="!myTurn">Draw Card</b-button>
+    </div> 
   </div>
 </template>
 
@@ -68,19 +100,18 @@ import { computed, onMounted, ref, Ref } from 'vue'
 import { io } from "socket.io-client"
 import { Card, GamePhase, Action, formatCard, CardId } from "../../../server/model"
 import AnimatedCard from "./AnimatedCard.vue"
-const canPlayCard:Ref<Boolean>=ref(false)
-const cardIds:Ref<CardId[]>=ref([])
 // props
 interface Props {
   playerIndex?: string
 }
+
 
 // default values for props
 const props = withDefaults(defineProps<Props>(), {
   playerIndex: "all",
 })
 
-
+const selectedCardIds = ref<CardId[]>([]);
 
 //new
 const lastPlayedCard = computed(() => {
@@ -105,8 +136,8 @@ const unusedCards = computed(() => {
   return result.length > 0 ? result : null;
 });
 
-
-
+//new add 4/15
+const opponents = ref([{ name: '123', cardCount: 0 }, { name: '234', cardCount: 0 }]);
 const socket = io()
 let x = props.playerIndex
 let playerIndex: number | "all" = parseInt(x) >= 0 ? parseInt(x) : "all"
@@ -120,8 +151,11 @@ const playCount = ref(-1)
 
 const myTurn = computed(() => currentTurnPlayerIndex.value === playerIndex && phase.value !== "game-over")
 
-
-
+//new add 4/15
+socket.on("opponent-info", (opponentInfo) => {
+ 
+  opponents.value = opponentInfo;
+});
 
 socket.on("all-cards", (allCards: Card[]) => {
   cards.value = allCards
@@ -163,19 +197,6 @@ async function playCard(cardId: CardId) {
     }
   }
 }
-async function playcards(cardIds:CardId[]){
-  alert("playcards length:"+String(cardIds.length))
-  for(const cardid of cardIds){
-    playCard(cardid)
-    alert("called Play card"+String(cardid))
-  }
-  canPlayCard.value=false
-}
-async function setcanplayCard(thiscardId:String){
-  cardIds.value.push(String(thiscardId))
-  canPlayCard.value=true
-  alert("one card clocked"+String(cardIds.value.length))
-}
 
 async function applyUpdatedCards(updatedCards: Card[]) {
   for (const x of updatedCards) {
@@ -187,15 +208,50 @@ async function applyUpdatedCards(updatedCards: Card[]) {
     }
   }
 }
+
+
+
+function toggleCardSelection(cardId: CardId) {
+ 
+  const index = selectedCardIds.value.indexOf(cardId);
+  if (index > -1) {
+    selectedCardIds.value.splice(index, 1);
+  } else {
+    selectedCardIds.value.push(cardId);
+  }
+
+  
+}
+
+//new add on 4/15
+function chatWith(opponentName:string, cardCount:number) {
+  alert(`Opponent: ${opponentName} - Cards: ${cardCount}`);
+}
+
+async function playSelectedCards() {
+  if (selectedCardIds.value.length > 0 && typeof playerIndex === "number") {
+    const updatedCards = await doAction({
+      action: "play-cards",  
+      playerIndex,
+      cardIds: selectedCardIds.value
+    });
+    if (updatedCards.length > 0) {
+      selectedCardIds.value = []; 
+    } else {
+      alert("操作失败");
+    }
+  }
+}
 </script>
 
 <style>
 .container {
   display: flex;
   flex-direction: column;
-  height: 85vh; 
-  justify-content: space-between; 
-  padding: 10px 0; 
+  justify-content: space-between;
+  height: auto; /* 改为自动高度以适应内容 */
+  min-height: 85vh; /* 至少保持原有高度 */
+  overflow: visible; /* 确保内容可以显示 */
 }
 
 .title {
@@ -205,6 +261,7 @@ async function applyUpdatedCards(updatedCards: Card[]) {
 .cards-container {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   margin-top: 20px; 
@@ -227,13 +284,84 @@ async function applyUpdatedCards(updatedCards: Card[]) {
   margin-bottom: 10px; /* This is the actual margin that creates space between the title and the cards */
 }
 
-.bottom-container .cards-container {
-  margin-top: 10px; 
+.card-pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  margin-top: 20px; 
+}
+
+.card-pile h1 {
+  text-align: center; 
+  margin-bottom: 10px; 
 }
 
 
-.card-pile .cards-container {
-  margin-top: 10px; 
+
+
+.play-board {
+  display: flex;
+  justify-content: space-between; 
+  align-items: flex-start;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
 }
+
+.opponent-info {
+  width: 150px; 
+  flex-shrink: 0; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.opponent {
+  display: flex;
+  flex-direction: column; 
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.left-opponent {
+  margin-right: auto; 
+}
+
+.right-opponent {
+  margin-left: auto; 
+}
+
+.your-cards {
+  flex-grow: 1; 
+  display: flex;
+  flex-direction: column; /* 添加这一行来堆叠子元素 */
+  align-items: center; /* 中心对齐子元素 */
+  margin-bottom: 5px; /* 确保与下方内容有足够的间距 */
+}
+
+
+.your-cards h1 {
+  margin-bottom: 20px; /* 分隔标题和卡牌 */
+}
+
+.your-cards .cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  /* 移除 margin-bottom，之前的 20px */
+}
+
+.your-cards .button-container {
+  display: flex;
+  justify-content: center; /* 居中按钮 */
+  margin-top: 20px; /* 从卡牌区域向下留出一些空间 */
+}
+
+
 </style>
 

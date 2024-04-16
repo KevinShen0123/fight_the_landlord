@@ -104,6 +104,18 @@ export function distributeInitialCards(state: GameState, cardsPerPlayer: number)
     moveCardToLastPlayed(state, card)
   }
 
+
+
+
+  
+
+
+  
+
+  console.log("Distribute completed")
+
+
+  
 }
 
 
@@ -170,7 +182,13 @@ export interface PlayCardAction {
   cardId: CardId
 }
 
-export type Action = DrawCardAction | PlayCardAction
+export interface PlayCardsAction {
+  action: "play-cards"
+  playerIndex: number
+  cardIds: CardId[];
+}
+
+export type Action = DrawCardAction | PlayCardAction | PlayCardsAction
 
 function moveToNextPlayer(state: GameState) {
   state.currentTurnPlayerIndex = (state.currentTurnPlayerIndex + 1) % state.playerNames.length
@@ -225,6 +243,7 @@ export function doAction(state: GameState, action: Action): Card[] {
     changedCards.push(card)
   }
 
+
   if (action.action === "play-card") {
     const card = state.cardsById[action.cardId]
     if (card.playerIndex !== state.currentTurnPlayerIndex) {
@@ -242,6 +261,30 @@ export function doAction(state: GameState, action: Action): Card[] {
     moveCardToLastPlayed(state, card)
     changedCards.push(card)
   }
+
+  if (action.action === "play-cards") {
+    const cardsToPlay = action.cardIds.map(cardId => state.cardsById[cardId]);
+    console.log(cardsToPlay)
+    
+    if (!cardsToPlay.every(card => card.playerIndex === state.currentTurnPlayerIndex)) {
+      return [];  
+    }
+  
+
+    const lastPlayedCard = getLastPlayedCard(state.cardsById);
+  
+  
+    if (lastPlayedCard && !cardsToPlay.every(card => areCompatible(card, lastPlayedCard))) {
+      return [];  
+    }
+  
+
+    cardsToPlay.forEach(card => {
+      moveCardToLastPlayed(state, card);
+      changedCards.push(card);
+    });
+  }
+  
 
   if (state.phase === "play" && action.action !== "draw-card") {
     moveToNextPlayer(state)
