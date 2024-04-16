@@ -234,7 +234,31 @@ function moveCardToLastPlayed({ currentTurnPlayerIndex, cardsById }: GameState, 
   card.locationType = "last-card-played"
   card.positionInLocation = null
 }
-
+function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
+  var canPlay=false
+      if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
+         canPlay=true
+      }else if(realcardtoplay.rank==="2"&&reallastplayedcard.rank!=="2"&&reallastplayedcard.rank!="3"){
+        canPlay=true
+      }else if(realcardtoplay.rank==="A"){
+        canPlay=false
+      }else if(reallastplayedcard.rank==="3"&&realcardtoplay.rank!=="3"){
+        canPlay=false
+      }else if(reallastplayedcard.rank==="2"&&realcardtoplay.rank!=="3"&&realcardtoplay.rank!=="2"){
+        canPlay=false
+      }else if(realcardtoplay.rank==="K"&&(reallastplayedcard.rank==="Q"||reallastplayedcard.rank==="J")){
+        canPlay=true
+      }else if(realcardtoplay.rank==="Q"&&reallastplayedcard.rank==="J"){
+        canPlay=true
+      }else if(Number.isNaN(realcardtoplay.rank)&&Number.isNaN(reallastplayedcard.rank)){
+        canPlay=false
+      }else if(Number.isNaN(realcardtoplay.rank)&&!(Number.isNaN(reallastplayedcard.rank))){
+        canPlay=true
+      }else if(Number(realcardtoplay.rank)>Number(reallastplayedcard.rank)){
+        canPlay=true
+      }
+      return canPlay
+}
 /**
  * updates the game state based on the given action
  * @returns an array of cards that were updated, or an empty array if the action is disallowed
@@ -306,28 +330,7 @@ export function doAction(state: GameState, action: Action): Card[] {
       console.log("1:1 Fight!")
       var reallastplayedcard=lastPlayedCard[0]
       var realcardtoplay=cardsToPlay[0]
-      var canPlay=false
-      if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
-         canPlay=true
-      }else if(realcardtoplay.rank==="2"&&reallastplayedcard.rank!=="2"&&reallastplayedcard.rank!="3"){
-        canPlay=true
-      }else if(realcardtoplay.rank==="A"){
-        canPlay=false
-      }else if(reallastplayedcard.rank==="3"&&realcardtoplay.rank!=="3"){
-        canPlay=false
-      }else if(reallastplayedcard.rank==="2"&&realcardtoplay.rank!=="3"&&realcardtoplay.rank!=="2"){
-        canPlay=false
-      }else if(realcardtoplay.rank==="K"&&(reallastplayedcard.rank==="Q"||reallastplayedcard.rank==="J")){
-        canPlay=true
-      }else if(realcardtoplay.rank==="Q"&&reallastplayedcard.rank==="J"){
-        canPlay=true
-      }else if(Number.isNaN(realcardtoplay.rank)&&Number.isNaN(reallastplayedcard.rank)){
-        canPlay=false
-      }else if(Number.isNaN(realcardtoplay.rank)&&!(Number.isNaN(reallastplayedcard.rank))){
-        canPlay=true
-      }else if(Number(realcardtoplay.rank)>Number(reallastplayedcard.rank)){
-        canPlay=true
-      }
+      var canPlay=compareSingleCard(realcardtoplay,reallastplayedcard)
       if(!canPlay){
         return []
       }
@@ -348,6 +351,129 @@ export function doAction(state: GameState, action: Action): Card[] {
         state.lastPlayedCards.push(lcard)
       }
     })
+    }else if(cardsToPlay.length===lastPlayedCard.length&&lastPlayedCard.length>1){
+      var allsame=true
+      for(var i=0;i<cardsToPlay.length;i++){
+        if(i>0){
+          if(cardsToPlay[i].rank!==cardsToPlay[i-1].rank){
+            allsame=false
+            break
+          }
+          if(lastPlayedCard[i].rank!==lastPlayedCard[i-1].rank){
+            allsame=false
+            break
+          }
+        }
+      }
+      if(allsame){
+        var canPlay=compareSingleCard(cardsToPlay[0],lastPlayedCard[0])
+        if(!canPlay){
+          return []
+        }
+        cardsToPlay.forEach(card => {
+          moveCardToLastPlayed(state, card);
+          changedCards.push(card);
+        });
+        lastPlayedCard=getLastPlayedCardS(state.cardsById)
+        lastPlayedCard.forEach(lcard=>{
+          var idequalcount=0
+          state.lastPlayedCards.forEach(lastcards=>{
+            if(lastcards.id==lcard.id){
+              idequalcount+=1;
+            }
+          })
+          if(idequalcount==0){
+            state.lastPlayedCards.push(lcard)
+          }
+        })
+      }else{
+        var equaldif=true
+        for(var i=0;i<cardsToPlay.length;i++){
+          if(i>0){
+            if(cardsToPlay[i].rank==="K"&&cardsToPlay[i-1].rank==="Q"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="Q"&&cardsToPlay[i-1].rank==="J"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="2"&&cardsToPlay[i-1].rank==="A"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="J"&&cardsToPlay[i-1].rank==="Q"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="A"&&cardsToPlay[i-1].rank==="2"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="Q"&&cardsToPlay[i-1].rank==="K"){
+              equaldif=true
+            }else if(cardsToPlay[j].rank==="J"&&cardsToPlay[j-1].rank==="10"){
+              equaldif=true
+            }else if(Math.abs(Number(cardsToPlay[i].rank)-Number(cardsToPlay[i-1].rank))===1){
+              equaldif=true
+            }else{
+              equaldif=false
+              break
+            }
+          }
+        }
+        if(equaldif===false){
+          return []
+        }
+        for(var j=0;j<lastPlayedCard.length;j++){
+          if(j>0){
+            if(lastPlayedCard[j].rank==="K"&&lastPlayedCard[j-1].rank==="Q"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="Q"&&lastPlayedCard[j-1].rank==="J"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="2"&&lastPlayedCard[j-1].rank==="A"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="J"&&lastPlayedCard[j-1].rank==="Q"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="A"&&lastPlayedCard[j-1].rank==="2"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="Q"&&lastPlayedCard[j-1].rank==="K"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="J"&&lastPlayedCard[j-1].rank==="10"){
+              equaldif=true
+            }else if(Math.abs(Number(lastPlayedCard[j].rank)-Number(lastPlayedCard[j-1].rank))===1){
+              equaldif=true
+            }else{
+              equaldif=false
+              break
+            }
+          }
+        }
+        if(equaldif===false){
+          return []
+        }
+        for(var a=0;a<cardsToPlay.length;a++){
+          var firstCt=0
+          for(var b=0;b<cardsToPlay.length;b++){
+             var compat=compareSingleCard(cardsToPlay[a],cardsToPlay[b])
+             if(!compat){
+               firstCt+=1;
+             }
+          }
+          var secondCt=0;
+          for(var c=0;c<lastPlayedCard.length;c++){
+            var compat=compareSingleCard(cardsToPlay[a],lastPlayedCard[c])
+            if(!compat){
+              secondCt+=1;
+            }
+          }
+          if(firstCt<secondCt){
+            return []
+          }
+        }
+        lastPlayedCard=getLastPlayedCardS(state.cardsById)
+        lastPlayedCard.forEach(lcard=>{
+          var idequalcount=0
+          state.lastPlayedCards.forEach(lastcards=>{
+            if(lastcards.id==lcard.id){
+              idequalcount+=1;
+            }
+          })
+          if(idequalcount==0){
+            state.lastPlayedCards.push(lcard)
+          }
+        })
+      }
     }else{
       lastPlayedCard.forEach(lastcard => {
         if (lastcard && !cardsToPlay.every(card => areCompatible(card, lastcard))) {
