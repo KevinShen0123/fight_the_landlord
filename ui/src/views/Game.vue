@@ -351,10 +351,13 @@ async function playSelectedCards() {
 
 .your-cards .cards-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* 对齐到容器的起始位置 */
+  flex-wrap: wrap; /* 允许卡牌换行 */
   gap: 10px;
-  /* 移除 margin-bottom，之前的 20px */
+  height: 240px; /* 设置固定高度以确保有两行的空间 */
+  align-content: flex-start; /* 垂直方向上对齐到起始边缘 */
 }
+
 
 .your-cards .button-container {
   display: flex;
