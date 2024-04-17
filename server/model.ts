@@ -457,7 +457,7 @@ export function doAction(state: GameState, action: Action): Card[] {
               equaldif=true
             }else if(cardsToPlay[i].rank==="Q"&&cardsToPlay[i-1].rank==="K"){
               equaldif=true
-            }else if(cardsToPlay[j].rank==="J"&&cardsToPlay[j-1].rank==="10"){
+            }else if(cardsToPlay[i].rank==="J"&&cardsToPlay[i-1].rank==="10"){
               equaldif=true
             }else if(Math.abs(Number(cardsToPlay[i].rank)-Number(cardsToPlay[i-1].rank))===1){
               equaldif=true
@@ -494,26 +494,58 @@ export function doAction(state: GameState, action: Action): Card[] {
             }
           }
         }
+        console.log("equaldif")
+        console.log(equaldif)
         if(equaldif===false){
           return []
         }
         for(var a=0;a<cardsToPlay.length;a++){
           var firstCt=0
           for(var b=0;b<cardsToPlay.length;b++){
-             var compat=compareSingleCard(cardsToPlay[a],cardsToPlay[b])
-             if(!compat){
-               firstCt+=1;
-             }
+            if(a!=b){
+              var compat=compareSingleCard(cardsToPlay[a],cardsToPlay[b])
+              if(!compat){
+                firstCt+=1;
+              }
+            }
           }
           var secondCt=0;
           for(var c=0;c<lastPlayedCard.length;c++){
             var compat=compareSingleCard(cardsToPlay[a],lastPlayedCard[c])
+            if(cardsToPlay[a].rank===lastPlayedCard[c].rank){
+              compat=true
+            }
             if(!compat){
               secondCt+=1;
             }
           }
-          if(firstCt<secondCt){
+          console.log("YYYYYYYYYYYYYYYY")
+          console.log(firstCt)
+          console.log(secondCt)
+          console.log(cardsToPlay.length)
+          console.log(lastPlayedCard.length)
+          console.log("YYYYYYYYYYYYYYY")
+          if(firstCt<=secondCt-1){
             return []
+          }
+        }
+        cardsToPlay.forEach(card => {
+          moveCardToLastPlayed(state, card);
+          changedCards.push(card);
+        });
+        var indexallsame=true
+        for(var m=0;m<cardsToPlay.length;m++){
+          for(var n=0;n<lastPlayedCard.length;n++){
+            if(cardsToPlay[m].playerIndex!==lastPlayedCard[n].playerIndex){
+              indexallsame=false
+              break
+            }
+          }
+        }
+        console.log("index all same????????"+indexallsame)
+        if(indexallsame){
+          for(var n=0;n<lastPlayedCard.length;n++){
+              lastPlayedCard[n].locationType="unused"
           }
         }
         lastPlayedCard=getLastPlayedCardS(state.cardsById)
@@ -545,12 +577,12 @@ export function doAction(state: GameState, action: Action): Card[] {
         changedCards.push(card);
       });
       var indexallsame=true
-      for(var m=0;m<cardsToPlay.length&&lastPlayedCard.length>0;m++){
-        console.log(cardsToPlay[m])
-        console.log(lastPlayedCard.length)
-        if(cardsToPlay[m].playerIndex!==lastPlayedCard[m].playerIndex){
-          indexallsame=false
-          break
+      for(var m=0;m<cardsToPlay.length;m++){
+        for(var n=0;n<lastPlayedCard.length;n++){
+          if(cardsToPlay[m].playerIndex!==lastPlayedCard[n].playerIndex){
+            indexallsame=false
+            break
+          }
         }
       }
       console.log("index all same????????"+indexallsame)
