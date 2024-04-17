@@ -5,12 +5,8 @@ import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Car
 const server = http.createServer()
 const io = new Server(server)
 const port = 8101
-var sender=""
-var chatinput=""
-var receiver=""
 let gameState = createEmptyGame(["player1", "player2","player3"], 1, 13)
 var rolelist=["Landlord","Peasant","Peasant"]
-var paramlistMy:String[][]=[[]]
 function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
     let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(cards, i);
@@ -75,19 +71,8 @@ io.on('connection', client => {
       gameState.lastPlayedCards
     )
   }
-  client.on("clientchat",paramlist=>{
-    sender=paramlist[0]
-    chatinput=paramlist[1]
-    receiver=paramlist[2]
-    var plist=[sender,chatinput,receiver]
-    paramlistMy.push(plist)
-    console.log("Paaaa")
-    console.log(paramlistMy)
-    client.emit("allchat",paramlistMy)
-  })
-  client.on("getallchat",()=>{
-    console.log("Try to get all chat")
-    client.emit("allchat",paramlistMy)
+  client.on("clientchat",sender=>{
+    console.log("send is"+sender)
   })
 
   
