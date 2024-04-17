@@ -5,9 +5,9 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+import Chat from './views/Chat.vue'
 import App from './App.vue'
 import Game from './views/Game.vue'
-
 const routes = [
 	{
 		path: "/:playerIndex",
@@ -17,6 +17,10 @@ const routes = [
 				playerIndex: route.params.playerIndex
 			}
 		}
+	},
+	{
+		path: "/chat",
+		component: Chat
 	}
 ]
 
