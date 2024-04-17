@@ -23,7 +23,7 @@
     
     <script setup lang="ts">
     import { computed,PropType} from 'vue';
-    import { areCompatible,Card } from "../../../server/model"
+    import { areCompatible,Card } from "../model"
   
     const props = defineProps({
   card: {

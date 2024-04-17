@@ -8,7 +8,7 @@
         <b-button variant="primary" @click="refresh">Refresh</b-button>
         <b-table striped hover :items="usersStatistics" :fields="fields" @head-clicked="handleHeadClicked">
           <template #cell(actions)="{ item }">
-            <b-button size="sm" variant="danger" @click="clearUserData(item.username)">Clear Data</b-button>
+            <b-button size="sm" variant="danger" @click="clearUserData(item.preferred_username)">Clear Data</b-button>
           </template>
           
           <template #head="{ key, label, sortable }">
@@ -48,7 +48,7 @@
 
   const currentSort = ref({ sortBy: 'gamesPlayed', sortDesc: true });
   const fields: Field[] = [
-    { key: 'username', label: 'Username', sortable: false },
+    { key: 'preferred_username', label: 'User Name', sortable: false },
     { key: 'gamesPlayed', label: 'Games Played', sortable: true },
     { key: 'gamesWon', label: 'Games Won', sortable: true },
     { key: 'lastLogin', label: 'Last Login', sortable: false, formatter: (value: string) => new Date(value).toLocaleString() },

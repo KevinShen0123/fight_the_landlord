@@ -3,12 +3,12 @@
         {{ errorMessage }}
     </div>
 
-    <div v-else class="user-settings" v-if="user && user.name">
+    <div v-else class="user-settings" v-if="user && user.preferred_username">
       <b-container>
-        <h1>{{ user.name }}'s Settings</h1>
+        <h1>{{ user.preferred_username }}'s Settings</h1>
         <b-form @submit.prevent="updateSettings">
           <b-form-group label="Username" label-for="username">
-            <b-form-input id="username" readonly :value="user.name"></b-form-input>
+            <b-form-input id="username" readonly :value="user.preferred_username"></b-form-input>
           </b-form-group>
   
           <b-form-group label="Score" label-for="score">
@@ -58,12 +58,13 @@
 
   onMounted(() => {
    
+   
   watchEffect(() => {
     
-    if (user.value && user.value.name) {
+    if (user.value && user.value.preferred_username) {
       (async () => {
         try {
-          const response = await fetch(`/api/settings/${user.value.name}`, {
+          const response = await fetch(`/api/settings/${user.value.preferred_username}`, {
             method: 'GET', 
             headers: {
               'Content-Type': 'application/json',
@@ -87,9 +88,9 @@
 
   
   async function updateSettings() {
-    if (user.value && user.value.name) {
+    if (user.value && user.value.preferred_username) {
       try {
-        const response = await fetch(`/api/settings/${user.value.name}`, {
+        const response = await fetch(`/api/settings/${user.value.preferred_username}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

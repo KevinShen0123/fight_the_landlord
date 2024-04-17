@@ -2,14 +2,14 @@
   <div class="home">
     <b-container class="mt-5">
       
-      <b-card v-if="!user.name" class="text-center">
+      <b-card v-if="!user.preferred_username" class="text-center">
         <h1>Welcome to the Fight the Landlord Card Game!</h1>
         <p>This is a fun traditional Chinese card game.</p>
         <b-button href="/api/login" variant="primary" class="custom-btn">Login to Play</b-button>
       </b-card>
 
       <b-card v-else class="text-center">
-        <h1>Welcome back, {{ user.name }}!</h1>
+        <h1>Welcome back, {{ user.preferred_username }}!</h1>
         <AdminHome v-if="user?.roles?.includes('Admin')" />
         <PlayerHome v-if="user?.roles?.includes('Player')" />
 
@@ -33,7 +33,7 @@
 
   const user: Ref<any> = inject("user")!
   
-    async function switchRole() {
+async function switchRole() {
 
   const currentRole = user.value.roles.includes('Admin') ? 'Admin' : 'Player';
   const newRole = currentRole === 'Admin' ? 'Player' : 'Admin';
