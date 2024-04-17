@@ -23,7 +23,7 @@
       <h1>Card Pile</h1>
       <div class="cards-container">
         <AnimatedCard
-            v-for="card in lastPlayedCards"
+            v-for="card in lplaycards"
             :key="card.id"
             :card="card"
             :includeLocation="true"
