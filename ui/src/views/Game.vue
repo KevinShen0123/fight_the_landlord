@@ -101,6 +101,9 @@ import { computed, onMounted, ref, Ref } from 'vue'
 import { io } from "socket.io-client"
 import { Card, GamePhase, Action, formatCard, CardId } from "../../../server/model"
 import AnimatedCard from "./AnimatedCard.vue"
+import { useRouter } from 'vue-router'
+import Chat from './Chat.vue'
+const router=useRouter()
 // props
 interface Props {
   playerIndex?: string
@@ -230,8 +233,9 @@ function toggleCardSelection(cardId: CardId) {
 
   
 }
-function chatWith(opponentName:string, cardCount:number) {
-  alert(`Opponent: ${opponentName} - Cards: ${cardCount}`);
+ function chatWith(opponentName:string, cardCount:number) {
+  // alert(`Opponent: ${opponentName} - Cards: ${cardCount}`);
+  router.push({path:'Chat'+"/"+playerIndex+"/"+opponentName,query:{sender:playerIndex,receiver:opponentName}})
 }
 async function playSelectedCards() {
   if (selectedCardIds.value.length > 0 && typeof playerIndex === "number") {

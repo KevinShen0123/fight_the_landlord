@@ -4,10 +4,9 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
-import Chat from './views/Chat.vue'
 import App from './App.vue'
 import Game from './views/Game.vue'
+import Chat from './views/Chat.vue'
 const routes = [
 	{
 		path: "/:playerIndex",
@@ -19,8 +18,14 @@ const routes = [
 		}
 	},
 	{
-		path: "/chat",
-		component: Chat
+		path: "/chat/:sender/:receiver",
+		component: Chat,
+		props (route) {
+			return {
+				sender: route.query.sender,
+				receiver:route.query.receiver
+			}
+		}
 	}
 ]
 

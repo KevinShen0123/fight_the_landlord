@@ -178,7 +178,10 @@ export function findNextCardToDraw(cardsById: Record<CardId, Card>): CardId | nu
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // player actions
-
+export class ChatText{
+  chatsender:String
+  chatcontent:String
+}
 export interface DrawCardAction {
   action: "draw-card"
   playerIndex: number
