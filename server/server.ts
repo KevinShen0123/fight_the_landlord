@@ -108,7 +108,7 @@ const wrap = (middleware: any) => (socket: any, next: any) => middleware(socket.
 io.use(wrap(sessionMiddleware))
 
 // hard-coded game configuration
-const playerUserIds = ["jx133","qingli"]
+const playerUserIds = ["jx133"]
 let gameState = createEmptyGame(playerUserIds, 1, 2)
 
 function emitUpdatedCardsForPlayers(cards: Card[], newGame = false) {
@@ -423,7 +423,7 @@ client.connect().then(async () => {
     const params = {
       scope: 'openid profile email',
       nonce: generators.nonce(),
-      // redirect_uri: `http://${HOST}:8221/api/login-callback`,
+      //redirect_uri: `http://${HOST}:8221/api/login-callback`,
       redirect_uri: `http://${HOST}:31000/api/login-callback`,
       state: generators.state(),
     }
