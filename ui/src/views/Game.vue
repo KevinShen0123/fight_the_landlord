@@ -224,7 +224,6 @@ function toggleCardSelection(cardId: CardId) {
 
 //有问题
  function chatWith(opponentName:string, cardCount:number) {
-  // alert(`Opponent: ${opponentName} - Cards: ${cardCount}`);
   var opponentindex=0
   if(opponentName=="player1"){
     opponentindex=0
