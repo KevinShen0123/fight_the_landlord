@@ -416,7 +416,7 @@ export function doAction(state: GameState, action: Action): Card[] {
             break
           }
         }
-        // console.log("index all same????????"+indexallsame)
+        console.log("index all same????????"+indexallsame)
         if(indexallsame){
           for(var n=0;n<lastPlayedCard.length;n++){
               lastPlayedCard[n].locationType="unused"
