@@ -113,12 +113,6 @@ export function distributeInitialCards(state: GameState, cardsPerPlayer: number)
 
 
 
-
-  
-
-
-  
-
   console.log("Distribute completed")
 
 
@@ -178,10 +172,7 @@ export function findNextCardToDraw(cardsById: Record<CardId, Card>): CardId | nu
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // player actions
-export class ChatText{
-  chatsender:String
-  chatcontent:String
-}
+
 export interface DrawCardAction {
   action: "draw-card"
   playerIndex: number

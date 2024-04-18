@@ -111,6 +111,10 @@ io.use(wrap(sessionMiddleware))
 const playerUserIds = ["jx133","qingli","kevin"]
 var rolelist=["Landlord","Peasant","Peasant"]
 let gameState = createEmptyGame(playerUserIds, 1, 13)
+var sender=""
+var chatinput=""
+var receiver=""
+var paramlistMy:String[][]=[[]]
 
 function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
@@ -188,6 +192,22 @@ io.on('connection', client => {
       gameState.lastPlayedCards
     )
   }
+
+  client.on("clientchat",paramlist=>{
+    sender=paramlist[0]
+    chatinput=paramlist[1]
+    receiver=paramlist[2]
+    var plist=[sender,chatinput,receiver]
+    paramlistMy.push(plist)
+    console.log("Paaaa")
+    console.log(paramlistMy)
+    client.emit("allchat",paramlistMy)
+  })
+  client.on("getallchat",()=>{
+    console.log("Try to get all chat")
+    client.emit("allchat",paramlistMy)
+  })
+
   
   console.log("New client")
   let playerIndex: number | "all" = playerUserIds.indexOf(user.preferred_username)

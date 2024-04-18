@@ -221,9 +221,26 @@ function toggleCardSelection(cardId: CardId) {
 
   
 }
+
+//有问题
  function chatWith(opponentName:string, cardCount:number) {
   // alert(`Opponent: ${opponentName} - Cards: ${cardCount}`);
-  router.push({path:'Chat'+"/"+playerIndex.value +"/"+opponentName,query:{sender:playerIndex.value ,receiver:opponentName}})
+  var opponentindex=0
+  if(opponentName=="player1"){
+    opponentindex=0
+  }else if(opponentName=="player2"){
+    opponentindex=1
+  }else if(opponentName=="Player3"){
+    opponentindex=2
+  }
+  router.push({
+  path: 'Chat' + "/" + playerIndex.value + "/" + opponentindex,
+  query: {
+    sender: playerIndex.value, 
+    receiver: opponentindex
+  }
+});
+
 }
 async function playSelectedCards() {
   if (selectedCardIds.value.length > 0 && typeof playerIndex.value  === "number") {

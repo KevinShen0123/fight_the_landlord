@@ -12,6 +12,7 @@ import Setting  from './views/Setting.vue'
 import Statistics from './views/Statistics.vue'
 import AdminHome from './views/AdminHome.vue'
 import PlayerHome from './views/PlayerHome.vue'
+import Chat  from './views/Chat.vue'
 const routes = [
   {
     path: "/",
@@ -36,6 +37,17 @@ const routes = [
   },
   { path: '/admin', name: 'AdminPage', component: AdminHome },
   { path: '/player', name: 'PlayerPage', component: PlayerHome },
+	{
+		path: "/chat/:sender/:receiver",
+		component: Chat,
+		props (route:any) {
+			return {
+				sender: route.query.sender,
+				receiver:route.query.receiver
+			}
+		}
+	}
+
 
 ]
 
