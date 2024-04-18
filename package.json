@@ -1,0 +1,14 @@
+{
+  "name": "fightthelandlord",
+  "version": "1.0.0",
+  "description": "Current Thoughts:\r 1. Add username to chat page url paramters\r 2. Socket.on based on username waiting for others' connections\r 3. socket connect based on username choosed\r 4. Group chat is multiple 1:1 chat",
+  "main": "index.js",
+  "devDependencies": {
+    "@playwright/test": "^1.43.1",
+    "@types/node": "^20.12.7"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

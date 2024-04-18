@@ -1,6 +1,6 @@
 import { createServer } from "http"
 import { Server } from "socket.io"
-import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card, getLastPlayedCard } from "./model"
+import { Action, createEmptyGame, doAction, filterCardsForPlayerPerspective, Card,distributeInitialCards } from "./model"
 import express, { NextFunction, Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import pino from 'pino'
@@ -108,22 +108,67 @@ const wrap = (middleware: any) => (socket: any, next: any) => middleware(socket.
 io.use(wrap(sessionMiddleware))
 
 // hard-coded game configuration
-const playerUserIds = ["jx133"]
-let gameState = createEmptyGame(playerUserIds, 1, 2)
+const playerUserIds = ["jx133","qingli","kevin"]
+var rolelist=["Landlord","Peasant","Peasant"]
+let gameState = createEmptyGame(playerUserIds, 1, 13)
 
-function emitUpdatedCardsForPlayers(cards: Card[], newGame = false) {
+function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
-    let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(cards, i)
+    let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(cards, i);
     if (newGame) {
-      updatedCardsFromPlayerPerspective = updatedCardsFromPlayerPerspective.filter(card => card.locationType !== "unused")
+      updatedCardsFromPlayerPerspective = updatedCardsFromPlayerPerspective.filter(card => card.locationType !== "unused");
     }
-    console.log("emitting update for player", i, ":", updatedCardsFromPlayerPerspective)
-    io.to(String(i)).emit(
-      newGame ? "all-cards" : "updated-cards", 
-      updatedCardsFromPlayerPerspective,
-    )
-  })
+    if (toAll) {
+      io.to(String(i)).emit(newGame ? "all-cards" : "updated-cards", updatedCardsFromPlayerPerspective);
+    } else if (i === gameState.currentTurnPlayerIndex) {
+      io.to(String(i)).emit(newGame ? "all-cards" : "updated-cards", updatedCardsFromPlayerPerspective);
+    }
+  });
+
+  if (newGame) {
+    gameState.phase = "play";
+    emitAllGameState();  
+  }
 }
+
+let allPlayersConnected = false;
+function checkAllPlayersConnected() {
+  
+  if (gameState.connectedPlayers.size === gameState.playerNames.length) {
+    allPlayersConnected = true
+    distributeInitialCards(gameState,14);
+    emitCardUpdates(Object.values(gameState.cardsById), true, true);
+
+  }
+  collectAndSendOpponentInfo();
+}
+
+
+function collectAndSendOpponentInfo() {
+  gameState.playerNames.forEach((_, index) => {
+    const opponentInfo = gameState.playerNames.map((name, idx) => {
+      if (idx !== index) { 
+        const cardCount = Object.values(gameState.cardsById).filter(card => 
+          card.playerIndex === idx && card.locationType === "player-hand").length;
+        return { name, cardCount };
+      }
+    }).filter(info => info); 
+
+    io.to(String(index)).emit("opponent-info", opponentInfo);
+  });
+}
+
+function emitAllGameState() {
+  io.emit( 
+    "game-state", 
+    null,
+    gameState.currentTurnPlayerIndex,
+    gameState.phase,
+    gameState.playCount,
+    gameState.lastPlayedCards,
+  );
+}
+
 
 io.on('connection', client => {
   const user = (client.request as any).session?.passport?.user
@@ -139,7 +184,8 @@ io.on('connection', client => {
       playerIndex,
       gameState.currentTurnPlayerIndex,
       gameState.phase,
-      gameState.playCount
+      gameState.playCount,
+      gameState.lastPlayedCards
     )
   }
   
@@ -148,9 +194,19 @@ io.on('connection', client => {
   if (playerIndex === -1) {
     playerIndex = "all"
   }
+
+  console.log("playerIndex set", playerIndex)
+  console.log(gameState.connectedPlayers)
+  console.log(gameState.connectedPlayers.has(playerIndex as any))
+  
   client.join(String(playerIndex))
+  const alreadyDistributed=gameState.connectedPlayers.has(playerIndex as any)
+  if(!(gameState.connectedPlayers.has(playerIndex as any))){
+    gameState.connectedPlayers.add(playerIndex as any); 
+  }
   
   if (typeof playerIndex === "number") {
+    console.log("IN HRER")
     client.emit(
       "all-cards", 
       filterCardsForPlayerPerspective(Object.values(gameState.cardsById), playerIndex).filter(card => card.locationType !== "unused"),
@@ -161,12 +217,15 @@ io.on('connection', client => {
       Object.values(gameState.cardsById),    
     )
   }
+  if(!alreadyDistributed||gameState.connectedPlayers.size < gameState.playerNames.length){
+    checkAllPlayersConnected()
+  }
   emitGameState()
 
   client.on("action", (action: Action) => {
     if (typeof playerIndex === "number") {
       const updatedCards = doAction(gameState, { ...action, playerIndex })
-      emitUpdatedCardsForPlayers(updatedCards)
+      emitCardUpdates(updatedCards,false,true)
     } else {
       // no actions allowed from "all"
     }
@@ -180,14 +239,15 @@ io.on('connection', client => {
       gameState.currentTurnPlayerIndex,
       gameState.phase,
       gameState.playCount,
-      getLastPlayedCard(gameState.cardsById)
+      gameState.lastPlayedCards
     )
+    collectAndSendOpponentInfo();
   })
 
   client.on("new-game", () => {
     gameState = createEmptyGame(gameState.playerNames, 1, 2)
     const updatedCards = Object.values(gameState.cardsById)
-    emitUpdatedCardsForPlayers(updatedCards, true)
+    emitCardUpdates(updatedCards,true,true)
     io.to("all").emit(
       "all-cards", 
       updatedCards,
@@ -198,8 +258,9 @@ io.on('connection', client => {
       gameState.currentTurnPlayerIndex,
       gameState.phase,
       gameState.playCount,
-      getLastPlayedCard(gameState.cardsById),
+      gameState.lastPlayedCards
     )
+    collectAndSendOpponentInfo();
   })
 })
 
@@ -423,8 +484,8 @@ client.connect().then(async () => {
     const params = {
       scope: 'openid profile email',
       nonce: generators.nonce(),
-      //redirect_uri: `http://${HOST}:8221/api/login-callback`,
-      redirect_uri: `http://${HOST}:31000/api/login-callback`,
+      redirect_uri: `http://${HOST}:8221/api/login-callback`,
+      //redirect_uri: `http://${HOST}:31000/api/login-callback`,
       state: generators.state(),
     }
     
