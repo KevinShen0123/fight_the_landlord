@@ -38,6 +38,7 @@ e2e_tests:
   image: node:16.13
   script:
     - node --version  # 输出 Node.js 版本
+    - echo $PATH
     - npm --version   # 输出 npm 版本
 
   #   - npx playwright install
