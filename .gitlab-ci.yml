@@ -1,5 +1,4 @@
 # This is an updated .gitlab-ci.yml file
-image: node:latest
 # Define the stages of your pipeline
 stages:
   - build
@@ -24,9 +23,10 @@ build_ui:
 
 deploy:
   stage: deploy
-  image: bitnami/kubectl:latest
   script:
+    - ls -al
     - kubectl create -f k8s/
+
 # # Test stage
 # test:
 #   stage: test
