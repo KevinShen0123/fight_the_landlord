@@ -21,7 +21,6 @@ build_ui:
     - docker build -t fightthelandlord-ui ./ui
     - docker image ls
 
-
 deploy:
   stage: deploy
   script:
