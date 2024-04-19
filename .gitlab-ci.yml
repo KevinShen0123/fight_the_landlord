@@ -29,7 +29,6 @@ deploy:
     - echo "$KUBECONFIG_CONTENT" > ./kubeconfig  
     - export KUBECONFIG=./kubeconfig  
     - kubectl config get-contexts  
-    - kubectl delete -f k8s/
     - kubectl create -f k8s/
     - kubectl delete -f k8s/
 
