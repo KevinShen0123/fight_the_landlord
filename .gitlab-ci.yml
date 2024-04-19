@@ -49,6 +49,7 @@ e2e_tests:
     - node --version
     - npm --version
     - npx playwright test --project=webkit
+    
   # artifacts:
   #   when: always
   #   reports:
