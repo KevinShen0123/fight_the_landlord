@@ -33,10 +33,12 @@ deploy:
     - kubectl delete -f k8s/
 
 
+
 e2e_tests:
   stage: e2e_test
+  image: node:latest
   script:
-    - docker run -t --rm --ipc=host mcr.microsoft.com/playwright:v1.28.0-focal /bin/bash -c 'npx playwright test --project=chromium'
+    - npm version
   #   - npx playwright install
   #   - npx playwright test --project=webkit
   # artifacts:
