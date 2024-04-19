@@ -41,6 +41,7 @@ e2e_tests:
     - which npm || echo "npm not found"
     - if [ ! -x "$(command -v npm)" ]; then curl -L https://www.npmjs.com/install.sh | sh; fi
     - npm --version
+    
 
   #   - npx playwright install
   #   - npx playwright test --project=webkit
