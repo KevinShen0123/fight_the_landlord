@@ -25,4 +25,4 @@ deploy:
   stage: deploy
   script:
     - kubectl config get-contexts
-    - kubectl create -f k8s\
+    - kubectl create -f k8s/
