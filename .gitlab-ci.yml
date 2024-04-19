@@ -38,7 +38,6 @@ e2e_tests:
   stage: e2e_test
   image: mcr.microsoft.com/playwright:v1.x.x-focal
   script:
-    - npm install
     - npx playwright install --with-deps
     - npx playwright test --project=webkit
   artifacts:
