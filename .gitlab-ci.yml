@@ -35,12 +35,15 @@ deploy:
 
 e2e_tests:
   stage: e2e_test
-  image: mcr.microsoft.com/playwright:v1.x.x-focal
+  image: mcr.microsoft.com/playwright:v1.43.1
+  before_script:
+    - npm install
   script:
-    - npm i -D @playwright/test
     - npx playwright install
     - npx playwright test --project=webkit
   artifacts:
     when: always
+    paths:
+      - tests/results/
     reports:
       junit: tests/results/*.xml
