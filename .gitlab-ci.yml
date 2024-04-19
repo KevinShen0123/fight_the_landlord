@@ -2,8 +2,8 @@
 # Define the stages of your pipeline
 stages:
   - build
-  - test
   - deploy
+  - e2e_test
 
 # Define the jobs to be executed within each stage
 # Jobs are executed in parallel unless explicitly dependent on each other
@@ -30,3 +30,16 @@ deploy:
     - export KUBECONFIG=./kubeconfig  
     - kubectl config get-contexts  
     - kubectl create -f k8s/
+
+
+e2e_tests:
+  stage: e2e_test
+  image: mcr.microsoft.com/playwright:v1.x.x-focal
+  script:
+    - npm install
+    - npx playwright install --with-deps
+    - npx playwright test --project=webkit
+  artifacts:
+    when: always
+    reports:
+      junit: tests/results/*.xml
