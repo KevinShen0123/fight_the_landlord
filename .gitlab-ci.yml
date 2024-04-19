@@ -32,7 +32,6 @@ deploy:
     - kubectl create -f k8s/
     - kubectl delete -f k8s/
 
-
 e2e_tests:
   stage: e2e_test
   image: node:latest 
