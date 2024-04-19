@@ -10,16 +10,23 @@ stages:
 # Jobs are executed in parallel unless explicitly dependent on each other
 
 # Build stage
-build_ui:
-  stage: build
-  script:
-    - cd ui
-    - npm install
 build_server:
   stage: build
   script:
-    - cd server
-    - npm install
+    - docker build -t fightthelandlord-server ./server
+    - docker image ls
+
+build_ui:
+  stage: build
+  script:
+    - docker build -t fightthelandlord-ui ./ui
+    - docker image ls
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - kubectl create -f k8s/
 # # Test stage
 # test:
 #   stage: test
@@ -32,7 +39,3 @@ build_server:
 #     - npm test
 
 # # Deploy stage
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploying the project..."
