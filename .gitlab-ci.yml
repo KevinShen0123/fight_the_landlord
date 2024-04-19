@@ -26,6 +26,8 @@ deploy:
   stage: deploy
   image: bitnami/kubectl:latest
   script:
+    - echo "$KUBECONFIG_CONTENT" > /tmp/kubeconfig
+    - export KUBECONFIG=/tmp/kubeconfig
     - kubectl create -f k8s/
 # # Test stage
 # test:
