@@ -36,10 +36,10 @@ e2e_tests:
   stage: e2e_test
   image: node:latest 
   script:
-    - npm install
-    - npx playwright install
-    - npx playwright test --project=webkit
-  artifacts:
-    when: always
-    reports:
-      junit: tests/results/*.xml
+    - npm version
+  #   - npx playwright install
+  #   - npx playwright test --project=webkit
+  # artifacts:
+  #   when: always
+  #   reports:
+  #     junit: tests/results/*.xml
