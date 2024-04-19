@@ -24,5 +24,6 @@ build_ui:
 deploy:
   stage: deploy
   script:
+    - ls
     - kubectl config get-contexts
     - kubectl create -f k8s/
