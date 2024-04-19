@@ -26,5 +26,7 @@ deploy:
   stage: deploy
   script:
     - ls
-    - kubectl config get-contexts
+    - echo "$KUBECONFIG_CONTENT" > ./kubeconfig  
+    - export KUBECONFIG=./kubeconfig  
+    - kubectl config get-contexts  
     - kubectl create -f k8s/
