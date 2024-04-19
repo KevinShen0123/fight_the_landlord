@@ -33,12 +33,12 @@ deploy:
     - kubectl delete -f k8s/
 
 
-
 e2e_tests:
   stage: e2e_test
-  image: node:latest
+  image: node:16.13
   script:
-    - npm --version
+    - node --version  # 输出 Node.js 版本
+    - npm --version   # 输出 npm 版本
 
   #   - npx playwright install
   #   - npx playwright test --project=webkit
