@@ -194,7 +194,7 @@ export interface PassAction{
   playerIndex:number
 }
 
-export type Action = DrawCardAction | PlayCardAction | PlayCardsAction|PassAction
+export type Action = DrawCardAction | PlayCardAction | PlayCardsAction| PassAction
 
 function moveToNextPlayer(state: GameState) {
   state.currentTurnPlayerIndex = (state.currentTurnPlayerIndex + 1) % state.playerNames.length

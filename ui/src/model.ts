@@ -31,6 +31,8 @@ export interface GameState {
   currentTurnPlayerIndex: number
   phase: GamePhase
   playCount: number
+  connectedPlayers: Set<number> 
+  lastPlayedCards:Card[]
 }
 
 /**
@@ -52,6 +54,12 @@ export function computePlayerCardCounts({ playerNames, cardsById }: GameState) {
 export function getLastPlayedCard(cardsById: Record<CardId, Card>) {
   return Object.values(cardsById).find(c => c.locationType === "last-card-played") || null
 }
+/**
+ * finds the last played card
+ */
+export function getLastPlayedCardS(cardsById: Record<CardId, Card>) {
+  return Object.values(cardsById).filter(c => c.locationType === "last-card-played") || null
+}
 
 /**
  * extracts the cards that are currently in the given player's hand
@@ -71,6 +79,47 @@ export function getLastPlayedCard(cardsById: Record<CardId, Card>) {
   return playerIndex === -1 ? null : playerIndex
 }
 
+
+export function distributeInitialCards(state: GameState, cardsPerPlayer: number) {
+
+
+  
+
+  if (state.connectedPlayers.size !== state.playerNames.length) {
+    console.log("Not all players have connected yet. Cannot distribute cards.");
+    return;
+  }
+
+
+  for (let i = 0; i < state.playerNames.length; i++) {
+    for (let j = 0; j < cardsPerPlayer; j++) {
+      const cardId = findNextCardToDraw(state.cardsById);
+      if (cardId != null) {
+        const card = state.cardsById[cardId];
+        
+        moveCardToPlayer(state, card);
+      }
+      
+    }
+    moveToNextPlayer(state)
+  }
+
+  
+  // const cardId = findNextCardToDraw(state.cardsById)
+  // if (cardId != null) {
+  //   const card = state.cardsById[cardId]
+  //   // moveCardToLastPlayed(state, card)
+  // }
+
+  findNextCardToDraw(state.cardsById)
+
+  console.log("Distribute completed")
+
+
+  
+}
+
+
 /**
  * creates an empty GameState in the initial-card-dealing state
  */
@@ -88,11 +137,15 @@ export function getLastPlayedCard(cardsById: Record<CardId, Card>) {
           locationType: "unused",
           playerIndex: null,
           positionInLocation: null,
+          
         }
         cardsById[card.id] = card
       }
     }
   }
+
+  
+
 
   return {
     playerNames,
@@ -100,6 +153,8 @@ export function getLastPlayedCard(cardsById: Record<CardId, Card>) {
     currentTurnPlayerIndex: 0,
     phase: "initial-card-dealing",
     playCount: 0,
+    connectedPlayers: new Set(), 
+    lastPlayedCards:[]
   }
 }
 
@@ -129,7 +184,17 @@ export interface PlayCardAction {
   cardId: CardId
 }
 
-export type Action = DrawCardAction | PlayCardAction
+export interface PlayCardsAction {
+  action: "play-cards"
+  playerIndex: number
+  cardIds: CardId[];
+}
+export interface PassAction{
+  action:"Pass"
+  playerIndex:number
+}
+
+export type Action = DrawCardAction | PlayCardAction | PlayCardsAction| PassAction
 
 function moveToNextPlayer(state: GameState) {
   state.currentTurnPlayerIndex = (state.currentTurnPlayerIndex + 1) % state.playerNames.length
@@ -142,24 +207,74 @@ function moveCardToPlayer({ currentTurnPlayerIndex, cardsById }: GameState, card
   // update state
   card.locationType = "player-hand"
   card.playerIndex = currentTurnPlayerIndex
-  card.positionInLocation = Math.max(-1, ...(currentCardPositions.filter((pos): pos is number => pos !== null))) + 1;
-
+  card.positionInLocation = Math.max(-1, ...currentCardPositions as any) + 1
 }
 
 function moveCardToLastPlayed({ cardsById }: GameState, card: Card) {
   // change current last-card-played to unused
   Object.values(cardsById).forEach(c => {
     if (c.locationType === "last-card-played") {
-      c.locationType = "unused"
+      console.log("ccard")
+      console.log(c.rank+" "+card.rank)
+      console.log(c.playerIndex+" "+card.playerIndex)
+      console.log("ccard")
+      if(c.playerIndex!==card.playerIndex){
+        c.locationType="unused"
+      }
     }
   })
 
   // update state
   card.locationType = "last-card-played"
-  card.playerIndex = null
   card.positionInLocation = null
 }
+function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
+  var canPlay=false
+  if(realcardtoplay.rank==="3"&&reallastplayedcard.rank==="3"){
+    canPlay=true
+    return canPlay
+   }
+   if(realcardtoplay.rank==="A"&&reallastplayedcard.rank==="A"){
+    canPlay=true
+    return canPlay
+   }
 
+  if(realcardtoplay.playerIndex===reallastplayedcard.playerIndex){
+    canPlay=true
+    return canPlay
+  }
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    console.log(realcardtoplay.rank)
+    console.log(Number(realcardtoplay.rank))
+    console.log(Number.isNaN(Number(realcardtoplay.rank)))
+    console.log(Number.isNaN(reallastplayedcard.rank))
+    console.log(Number.isNaN(Number(realcardtoplay.rank))&&!(Number.isNaN(reallastplayedcard.rank)))
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+      if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
+         canPlay=true
+      }else if(realcardtoplay.rank==="2"&&reallastplayedcard.rank!=="2"&&reallastplayedcard.rank!="3"){
+        canPlay=true
+      }else if(realcardtoplay.rank==="A"){
+        canPlay=false
+      }else if(reallastplayedcard.rank==="3"&&realcardtoplay.rank!=="3"){
+        canPlay=false
+      }else if(reallastplayedcard.rank==="2"&&realcardtoplay.rank!=="3"&&realcardtoplay.rank!=="2"){
+        canPlay=false
+      }else if(realcardtoplay.rank==="K"&&(reallastplayedcard.rank==="Q"||reallastplayedcard.rank==="J")){
+        canPlay=true
+      }else if(realcardtoplay.rank==="Q"&&reallastplayedcard.rank==="J"){
+        canPlay=true
+      }else if(Number.isNaN(Number(realcardtoplay.rank))&&Number.isNaN(Number(reallastplayedcard.rank))&&reallastplayedcard.rank!="A"){
+        canPlay=false
+      }else if(Number.isNaN(Number(realcardtoplay.rank))&&!(Number.isNaN(Number(reallastplayedcard.rank)))){
+        canPlay=true
+      }else if(Number(realcardtoplay.rank)>Number(reallastplayedcard.rank)){
+        canPlay=true
+      }else if(reallastplayedcard.rank==="A"){
+        canPlay=true
+      }
+      return canPlay
+}
 /**
  * updates the game state based on the given action
  * @returns an array of cards that were updated, or an empty array if the action is disallowed
@@ -185,31 +300,14 @@ export function doAction(state: GameState, action: Action): Card[] {
     changedCards.push(card)
   }
 
-  if (state.phase === "initial-card-dealing") {
-    if (action.action !== "draw-card") {
-      return []
-    }
 
-    const counts = computePlayerCardCounts(state)
-    if (Math.max(...counts) === Math.min(...counts) && counts[0] === 3) {
-      // we are done drawing player cards
-      // draw one card to be the last card played
-      const cardId = findNextCardToDraw(state.cardsById)
-      if (cardId == null) {
-        return []
-      }
-      const card = state.cardsById[cardId]
-      moveCardToLastPlayed(state, card)
-      changedCards.push(card)
-      state.phase = "play"
-    }
-    moveToNextPlayer(state)
-  } else if (action.action === "play-card") {
+  if (action.action === "play-card") {
     const card = state.cardsById[action.cardId]
     if (card.playerIndex !== state.currentTurnPlayerIndex) {
       // not your card
       return []
     }
+
     const lastPlayedCard = getLastPlayedCard(state.cardsById)
     if (lastPlayedCard == null) {
       return []
@@ -221,6 +319,286 @@ export function doAction(state: GameState, action: Action): Card[] {
     moveCardToLastPlayed(state, card)
     changedCards.push(card)
   }
+  if(action.action ==="Pass"&&state.phase=="play"){
+   moveToNextPlayer(state)
+   return []
+  }
+
+  if (action.action === "play-cards") {
+    const cardsToPlay = action.cardIds.map(cardId => state.cardsById[cardId]);
+    console.log(cardsToPlay)
+    // 检查所有卡牌是否都属于当前玩家
+    if (!cardsToPlay.every(card => card.playerIndex === state.currentTurnPlayerIndex)) {
+      return [];  // 如果有卡牌不属于当前玩家，则不允许操作
+    }
+  
+    // 获取最后一张打出的卡牌
+    var  lastPlayedCard = getLastPlayedCardS(state.cardsById);
+    if(cardsToPlay.length!=lastPlayedCard.length&&lastPlayedCard.length>0){
+      console.log("length not equal!!!!!!!!!!")
+      var indexallsame=true
+      for(var x=0;x<cardsToPlay.length;x++){
+        for(var h=0;h<lastPlayedCard.length;h++){
+          if(lastPlayedCard[h].playerIndex!==cardsToPlay[x].playerIndex){
+            console.log("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+            console.log(lastPlayedCard[h].playerIndex)
+            console.log(cardsToPlay[x].playerIndex)
+            indexallsame=false
+            break
+          }
+        }
+      }
+      console.log("index all same not equal?"+indexallsame)
+      if(!indexallsame){
+      return [];
+      }
+    }
+    // 检查所有卡牌是否可以基于最后打出的卡牌连续打出
+    console.log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+    console.log(lastPlayedCard.length+" "+state.currentTurnPlayerIndex)
+    console.log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+    if(cardsToPlay.length===lastPlayedCard.length&&lastPlayedCard.length==1){
+      console.log("1:1 Fight!")
+      var reallastplayedcard=lastPlayedCard[0]
+      var realcardtoplay=cardsToPlay[0]
+      var canPlay=compareSingleCard(realcardtoplay,reallastplayedcard)
+      if(!canPlay){
+        return []
+      }
+      // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
+    cardsToPlay.forEach(card => {
+      moveCardToLastPlayed(state, card);
+      changedCards.push(card);
+    });
+    if(cardsToPlay[0].playerIndex===lastPlayedCard[0].playerIndex){
+      lastPlayedCard[0].locationType="unused"
+    }
+    lastPlayedCard=getLastPlayedCardS(state.cardsById)
+    lastPlayedCard.forEach(lcard=>{
+      var idequalcount=0
+      state.lastPlayedCards.forEach(lastcards=>{
+        if(lastcards.id==lcard.id){
+          idequalcount+=1;
+        }
+      })
+      if(idequalcount==0){
+        state.lastPlayedCards.push(lcard)
+      }
+    })
+    }else if(cardsToPlay.length===lastPlayedCard.length&&lastPlayedCard.length>1){
+      var allsame=true
+      for(var i=0;i<cardsToPlay.length;i++){
+        if(i>0){
+          if(cardsToPlay[i].rank!==cardsToPlay[i-1].rank){
+            allsame=false
+            break
+          }
+          if(lastPlayedCard[i].rank!==lastPlayedCard[i-1].rank){
+            allsame=false
+            break
+          }
+        }
+      }
+      if(allsame){
+        var canPlay=compareSingleCard(cardsToPlay[0],lastPlayedCard[0])
+        if(!canPlay){
+          return []
+        }
+        cardsToPlay.forEach(card => {
+          moveCardToLastPlayed(state, card);
+          changedCards.push(card);
+        });
+        var indexallsame=true
+        for(var m=0;m<cardsToPlay.length;m++){
+          if(cardsToPlay[m].playerIndex!==lastPlayedCard[m].playerIndex){
+            indexallsame=false
+            break
+          }
+        }
+        console.log("index all same????????"+indexallsame)
+        if(indexallsame){
+          for(var n=0;n<lastPlayedCard.length;n++){
+              lastPlayedCard[n].locationType="unused"
+          }
+        }
+        console.log(getLastPlayedCardS(state.cardsById).length)
+        lastPlayedCard=getLastPlayedCardS(state.cardsById)
+        lastPlayedCard.forEach(lcard=>{
+          var idequalcount=0
+          state.lastPlayedCards.forEach(lastcards=>{
+            if(lastcards.id==lcard.id){
+              idequalcount+=1;
+            }
+          })
+          if(idequalcount==0){
+            state.lastPlayedCards.push(lcard)
+          }
+        })
+      }else{
+        var equaldif=true
+        for(var i=0;i<cardsToPlay.length;i++){
+          if(i>0){
+            if(cardsToPlay[i].rank==="K"&&cardsToPlay[i-1].rank==="Q"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="Q"&&cardsToPlay[i-1].rank==="J"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="2"&&cardsToPlay[i-1].rank==="A"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="J"&&cardsToPlay[i-1].rank==="Q"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="A"&&cardsToPlay[i-1].rank==="2"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="Q"&&cardsToPlay[i-1].rank==="K"){
+              equaldif=true
+            }else if(cardsToPlay[i].rank==="J"&&cardsToPlay[i-1].rank==="10"){
+              equaldif=true
+            }else if(Math.abs(Number(cardsToPlay[i].rank)-Number(cardsToPlay[i-1].rank))===1){
+              equaldif=true
+            }else{
+              equaldif=false
+              break
+            }
+          }
+        }
+        if(equaldif===false){
+          return []
+        }
+        for(var j=0;j<lastPlayedCard.length;j++){
+          if(j>0){
+            if(lastPlayedCard[j].rank==="K"&&lastPlayedCard[j-1].rank==="Q"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="Q"&&lastPlayedCard[j-1].rank==="J"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="2"&&lastPlayedCard[j-1].rank==="A"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="J"&&lastPlayedCard[j-1].rank==="Q"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="A"&&lastPlayedCard[j-1].rank==="2"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="Q"&&lastPlayedCard[j-1].rank==="K"){
+              equaldif=true
+            }else if(lastPlayedCard[j].rank==="J"&&lastPlayedCard[j-1].rank==="10"){
+              equaldif=true
+            }else if(Math.abs(Number(lastPlayedCard[j].rank)-Number(lastPlayedCard[j-1].rank))===1){
+              equaldif=true
+            }else{
+              equaldif=false
+              break
+            }
+          }
+        }
+        console.log("equaldif")
+        console.log(equaldif)
+        if(equaldif===false){
+          return []
+        }
+        for(var a=0;a<cardsToPlay.length;a++){
+          var firstCt=0
+          for(var b=0;b<cardsToPlay.length;b++){
+            if(a!=b){
+              var compat=compareSingleCard(cardsToPlay[a],cardsToPlay[b])
+              if(!compat){
+                firstCt+=1;
+              }
+            }
+          }
+          var secondCt=0;
+          for(var c=0;c<lastPlayedCard.length;c++){
+            var compat=compareSingleCard(cardsToPlay[a],lastPlayedCard[c])
+            if(cardsToPlay[a].rank===lastPlayedCard[c].rank){
+              compat=true
+            }
+            if(!compat){
+              secondCt+=1;
+            }
+          }
+          console.log("YYYYYYYYYYYYYYYY")
+          console.log(firstCt)
+          console.log(secondCt)
+          console.log(cardsToPlay.length)
+          console.log(lastPlayedCard.length)
+          console.log("YYYYYYYYYYYYYYY")
+          if(firstCt<=secondCt-1){
+            return []
+          }
+        }
+        cardsToPlay.forEach(card => {
+          moveCardToLastPlayed(state, card);
+          changedCards.push(card);
+        });
+        var indexallsame=true
+        for(var m=0;m<cardsToPlay.length;m++){
+          for(var n=0;n<lastPlayedCard.length;n++){
+            if(cardsToPlay[m].playerIndex!==lastPlayedCard[n].playerIndex){
+              indexallsame=false
+              break
+            }
+          }
+        }
+        console.log("index all same????????"+indexallsame)
+        if(indexallsame){
+          for(var n=0;n<lastPlayedCard.length;n++){
+              lastPlayedCard[n].locationType="unused"
+          }
+        }
+        lastPlayedCard=getLastPlayedCardS(state.cardsById)
+        lastPlayedCard.forEach(lcard=>{
+          var idequalcount=0
+          state.lastPlayedCards.forEach(lastcards=>{
+            if(lastcards.id==lcard.id){
+              idequalcount+=1;
+            }
+          })
+          if(idequalcount==0){
+            state.lastPlayedCards.push(lcard)
+          }
+        })
+      }
+    }else{
+      // lastPlayedCard.forEach(lastcard => {
+      //   if (lastcard && !cardsToPlay.every(card => areCompatible(card, lastcard))) {
+      //     incompatiblecount+=1  // 如果有卡牌与最后打出的卡牌不兼容，则不允许操作
+      //   }
+      // })
+      // if(incompatiblecount!==0){
+      //   return []
+      // }
+    
+      // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
+      cardsToPlay.forEach(card => {
+        moveCardToLastPlayed(state, card);
+        changedCards.push(card);
+      });
+      var indexallsame=true
+      for(var m=0;m<cardsToPlay.length;m++){
+        for(var n=0;n<lastPlayedCard.length;n++){
+          if(cardsToPlay[m].playerIndex!==lastPlayedCard[n].playerIndex){
+            indexallsame=false
+            break
+          }
+        }
+      }
+      console.log("index all same????????"+indexallsame)
+      if(indexallsame){
+        for(var n=0;n<lastPlayedCard.length;n++){
+            lastPlayedCard[n].locationType="unused"
+        }
+      }
+      lastPlayedCard=getLastPlayedCardS(state.cardsById)
+      lastPlayedCard.forEach(lcard=>{
+        var idequalcount=0
+        state.lastPlayedCards.forEach(lastcards=>{
+          if(lastcards.id==lcard.id){
+            idequalcount+=1;
+          }
+        })
+        if(idequalcount==0){
+          state.lastPlayedCards.push(lcard)
+        }
+      })
+    }
+  }
+  
 
   if (state.phase === "play" && action.action !== "draw-card") {
     moveToNextPlayer(state)

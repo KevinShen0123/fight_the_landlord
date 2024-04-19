@@ -3,7 +3,7 @@
     <b-button class="mx-2 my-2" size="sm" @click="socket.emit('new-game')">New Game</b-button>
     <b-badge class="mr-2 mb-2" :variant="myTurn ? 'primary' : 'secondary'">turn: {{ currentTurnPlayerIndex }}</b-badge>
     <b-badge class="mr-2 mb-2">{{ phase }}</b-badge>
-    <b-button class="mx-2 my-2" size="sm" @click="drawCard" :disabled="!myTurn">Draw Card</b-button>
+   
     <div class = "container">
       <div class="unused-cards">
         <h1>Unused Card</h1>
@@ -27,7 +27,7 @@
             :key="card.id"
             :card="card"
             :includeLocation="true"
-            :lastPlayedCard="lastPlayedCard"
+            :lastPlayedCard="lastPlayedCard"d
             @cardClick="playCard(card.id)"
           />
       </div>
@@ -36,7 +36,7 @@
       <div class="play-board">
         <div class="opponent-info left-opponent">
           <!-- Left opponent's info -->
-          <div v-if="opponents[0]" class="opponent" @click="chatWith(opponents[0].name, opponents[0].cardCount)">
+          <div v-if="opponents[0]" class="opponent" @click="chatWith(opponents[0].name)">
             <b-badge variant="info">{{ opponents[0].name }}</b-badge>
             <b-badge variant="warning">Cards: {{ opponents[0].cardCount }}</b-badge>
           </div>
@@ -68,7 +68,7 @@
 
         <div class="opponent-info right-opponent">
           <!-- Right opponent's info -->
-          <div v-if="opponents[1]" class="opponent" @click="chatWith(opponents[1].name, opponents[1].cardCount)">
+          <div v-if="opponents[1]" class="opponent" @click="chatWith(opponents[1].name)">
             <b-badge variant="info">{{ opponents[1].name }}</b-badge>
             <b-badge variant="warning">Cards: {{ opponents[1].cardCount }}</b-badge>
           </div>
@@ -79,21 +79,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, Ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
 import { io } from "socket.io-client"
-import { Card, GamePhase, Action, formatCard, CardId } from "../../../server/model"
+import { Card, GamePhase, Action, CardId } from "../model"
 import AnimatedCard from "./AnimatedCard.vue"
 import { useRouter } from 'vue-router'
-import Chat from './Chat.vue'
 const router=useRouter()
-// props
-interface Props {
-  playerIndex?: string
-}
-// default values for props
-const props = withDefaults(defineProps<Props>(), {
-  playerIndex: "all",
-})
+
 
 const selectedCardIds = ref<CardId[]>([]);
 
@@ -164,7 +156,7 @@ socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: numb
 })
 
 function doAction(action: Action) {
-  return new Promise<Card[]>((resolve, reject) => {
+  return new Promise<Card[]>((resolve, ) => {
     socket.emit("action", action)
     if(action.action!=="Pass"){
       socket.once("updated-cards", (updatedCards: Card[]) => {
@@ -174,14 +166,14 @@ function doAction(action: Action) {
   })
 }
 
-async function drawCard() {
-  if (typeof playerIndex.value === "number") {
-    const updatedCards = await doAction({ action: "draw-card", playerIndex: playerIndex.value })
-    if (updatedCards.length === 0) {
-      alert("didn't work")
-    }
-  }
-}
+// async function drawCard() {
+//   if (typeof playerIndex.value === "number") {
+//     const updatedCards = await doAction({ action: "draw-card", playerIndex: playerIndex.value })
+//     if (updatedCards.length === 0) {
+//       alert("didn't work")
+//     }
+//   }
+// }
 
 async function playCard(cardId: CardId) {
   if (typeof playerIndex.value === "number") {
@@ -223,7 +215,7 @@ function toggleCardSelection(cardId: CardId) {
 }
 
 //有问题
- function chatWith(opponentName:string, cardCount:number) {
+ function chatWith(opponentName:string) {
   var opponentindex=0
   if(opponentName=="player1"){
     opponentindex=0

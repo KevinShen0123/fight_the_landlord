@@ -22,9 +22,9 @@
 </div>
 </template>
 <script setup lang="ts">
-import {computed,onMounted,ref} from 'vue'
-import { areCompatible } from "../../../server/model"
-import { useRouter,useRoute } from 'vue-router'
+import {computed,ref} from 'vue'
+
+import { useRoute } from 'vue-router'
 import { io } from "socket.io-client"
 const chatinput=ref("")
 const route=useRoute()
@@ -32,7 +32,6 @@ const sender=computed(() => route.query.sender)
 const receiver=computed(() => route.query.receiver)
 const socket=io()
 const allchats = ref([])
-var callOnmount=ref(0)
 // socket.on("allchats",(sender,chatinput,receiver)=>{
 //   alert("new chat received")
 //   alert(sender)

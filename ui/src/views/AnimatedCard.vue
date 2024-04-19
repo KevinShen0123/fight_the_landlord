@@ -24,7 +24,7 @@
   
 <script setup lang="ts">
   import { computed,PropType} from 'vue';
-  import { areCompatible,Card } from "../../../server/model"
+  import { Card } from "../model"
   const emit = defineEmits(['cardClick']);
   const props = defineProps({
       card: Object as PropType<Card | null | undefined>,
