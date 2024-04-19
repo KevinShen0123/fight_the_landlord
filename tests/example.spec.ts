@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test player UI', async ({ page }) => {
-  await page.goto('http://localhost:8221/api/login?key=foo-bar-baz&user=qingli&role=Player');
+  await page.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=qingli&role=Player');
   await page.waitForTimeout(1000); 
 
   await page.getByRole('heading', { name: 'Welcome back, qingli!' });
@@ -19,7 +19,7 @@ test('test player UI', async ({ page }) => {
 });
 
 test('test admin UI', async ({ page }) => {
-  await page.goto('http://localhost:8221/api/login?key=foo-bar-baz&user=sword&role=Admin');
+  await page.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=sword&role=Admin');
   await page.waitForTimeout(1000); 
 
   await page.getByRole('heading', { name: 'Welcome back, sword!' });
