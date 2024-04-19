@@ -108,14 +108,65 @@ const wrap = (middleware: any) => (socket: any, next: any) => middleware(socket.
 io.use(wrap(sessionMiddleware))
 
 // hard-coded game configuration
-const playerUserIds = ["jx133","kevin","qingli"]
+const playerUserIds = ["steve","ks713","qingli"]
 var rolelist=["Landlord","Peasant","Peasant"]
 let gameState = createEmptyGame(playerUserIds, 1, 13)
 var sender=""
 var chatinput=""
 var receiver=""
 var paramlistMy:String[][]=[[]]
-
+function checkGameisOver(lastplayedcards:Card[]){
+  var gameisOver:Boolean =false
+  var playcount:number[]=[]
+  playcount.push(0)
+  playcount.push(0)
+  playcount.push(0)
+ for(var i=0;i<lastplayedcards.length;i++){
+  var thiscard=lastplayedcards[i]
+  if(thiscard.playerIndex==0){
+    playcount[0]+=1
+  }else if(thiscard.playerIndex==1){
+    playcount[1]+=1
+  }else if(thiscard.playerIndex==2){
+    playcount[2]+=1
+  }
+  if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
+    gameisOver=true
+    break
+  }
+ }
+ console.log(playcount)
+ console.log("game is over?????"+gameisOver)
+ return gameisOver
+}
+function determineWinner(lastplayedcards:Card[]){
+  var winnerindex=0
+  var playcount:number[]=[]
+  playcount.push(0)
+  playcount.push(0)
+  playcount.push(0)
+  for(var i=0;i<lastplayedcards.length;i++){
+    var thiscard=lastplayedcards[i]
+    if(thiscard.playerIndex==0){
+      playcount[0]+=1
+    }else if(thiscard.playerIndex==1){
+      playcount[1]+=1
+    }else if(thiscard.playerIndex==2){
+      playcount[2]+=1
+    }
+    if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
+      if(playcount[0]==1){
+          winnerindex=0
+      }else if(playcount[1]==1){
+          winnerindex=1
+      }else if(playcount[2]==1){
+          winnerindex=2
+      }
+      break
+    }
+   }
+   return winnerindex
+}
 function emitCardUpdates(cards: Card[], newGame = false, toAll = true) {
   gameState.playerNames.forEach((_, i) => {
     let updatedCardsFromPlayerPerspective = filterCardsForPlayerPerspective(cards, i);
@@ -170,6 +221,8 @@ function emitAllGameState() {
     gameState.phase,
     gameState.playCount,
     gameState.lastPlayedCards,
+    checkGameisOver(gameState.lastPlayedCards),
+      determineWinner(gameState.lastPlayedCards)
   );
 }
 
@@ -183,13 +236,17 @@ io.on('connection', client => {
   }
 
   function emitGameState() {
+    console.log("XBBBBBBBBBBBBBBBBBBBBBBB")
+    console.log(gameState.lastPlayedCards)
     client.emit(
       "game-state", 
       playerIndex,
       gameState.currentTurnPlayerIndex,
       gameState.phase,
       gameState.playCount,
-      gameState.lastPlayedCards
+      gameState.lastPlayedCards,
+      checkGameisOver(gameState.lastPlayedCards),
+      determineWinner(gameState.lastPlayedCards)
     )
   }
 
@@ -253,13 +310,17 @@ io.on('connection', client => {
       "updated-cards", 
       Object.values(gameState.cardsById),    
     )
+    console.log("XBBBBBBBBBBBBBBBBBBBBBBB")
+    console.log(gameState.lastPlayedCards)
     io.emit(
       "game-state", 
       null,
       gameState.currentTurnPlayerIndex,
       gameState.phase,
       gameState.playCount,
-      gameState.lastPlayedCards
+      gameState.lastPlayedCards,
+      checkGameisOver(gameState.lastPlayedCards),
+      determineWinner(gameState.lastPlayedCards)
     )
     collectAndSendOpponentInfo();
   })
@@ -272,13 +333,17 @@ io.on('connection', client => {
       "all-cards", 
       updatedCards,
     )
+    console.log("XBBBBBBBBBBBBBBBBBBBBBBB")
+    console.log(gameState.lastPlayedCards)
     io.emit(
       "game-state", 
       playerIndex,
       gameState.currentTurnPlayerIndex,
       gameState.phase,
       gameState.playCount,
-      gameState.lastPlayedCards
+      gameState.lastPlayedCards,
+      checkGameisOver(gameState.lastPlayedCards),
+      determineWinner(gameState.lastPlayedCards)
     )
     collectAndSendOpponentInfo();
   })
@@ -505,7 +570,7 @@ client.connect().then(async () => {
       scope: 'openid profile email',
       nonce: generators.nonce(),
       //redirect_uri: `http://${HOST}:8221/api/login-callback`,
-      redirect_uri: `http://${HOST}:31000/api/login-callback`,
+      redirect_uri: `http://${HOST}:8221/api/login-callback`,
       state: generators.state(),
     }
     

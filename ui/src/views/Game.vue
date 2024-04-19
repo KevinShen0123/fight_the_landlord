@@ -132,9 +132,11 @@ const currentTurnPlayerIndex = ref(-1)
 const phase = ref("")
 const playCount = ref(-1)
 const lastPlayedCards:Ref<Card[]>=ref([])
+const gameisover:Ref<Boolean>=ref(false)
+const winnerindex:Ref<number>=ref(-1)
 const myTurn = computed(() => currentTurnPlayerIndex.value === playerIndex.value && phase.value !== "game-over")
 socket.on("opponent-info", (opponentInfo) => {
- 
+//  alert(String(gameisover.value)+" "+String(winnerindex.value))
  opponents.value = opponentInfo;
 });
 socket.on("all-cards", (allCards: Card[]) => {
@@ -145,7 +147,7 @@ socket.on("updated-cards", (updatedCards: Card[]) => {
   applyUpdatedCards(updatedCards)
 })
 
-socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: number, newPhase: GamePhase, newPlayCount: number,lastPlayedCardsArr:Card[]) => {
+socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: number, newPhase: GamePhase, newPlayCount: number,lastPlayedCardsArr:Card[],gameisoverS:Boolean,winnerindexS:number) => {
   if (newPlayerIndex != null) {
     playerIndex.value = newPlayerIndex
   }
@@ -153,8 +155,15 @@ socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: numb
   phase.value = newPhase
   playCount.value = newPlayCount
   lastPlayedCards.value=lastPlayedCardsArr
-})
+  alert("previous ok!!!!!"+typeof gameisoverS)
 
+  gameisover.value=gameisoverS
+  winnerindex.value=winnerindexS
+  alert(gameisover.value+" "+winnerindex.value)
+  if(gameisover.value){
+    alert("game is over,winner is"+winnerindex.value)
+  }
+})
 function doAction(action: Action) {
   return new Promise<Card[]>((resolve, ) => {
     socket.emit("action", action)
