@@ -35,7 +35,7 @@ deploy:
 
 e2e_tests:
   stage: e2e_test
-  image: node:12.22.9
+  image: node:18
   script:
     - node --version
     - which npm || echo "npm not found"
