@@ -32,9 +32,14 @@ deploy:
     - kubectl create -f k8s/
     - kubectl delete -f k8s/
 
+before_script:
+  - curl -sL https://deb.nodesource.com/setup_14.x | bash -
+  - apt-get install -y nodejs
+  - node -v
+  - npm -v
+
 e2e_tests:
   stage: e2e_test
-  image: node:latest 
   script:
     - npm version
   #   - npx playwright install
