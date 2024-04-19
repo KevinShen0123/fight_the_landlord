@@ -1,10 +1,9 @@
 # This is an updated .gitlab-ci.yml file
-image: node:latest
 # Define the stages of your pipeline
 stages:
   - build
-  - test
   - deploy
+  - e2e_test
 
 # Define the jobs to be executed within each stage
 # Jobs are executed in parallel unless explicitly dependent on each other
@@ -22,20 +21,40 @@ build_ui:
     - docker build -t fightthelandlord-ui ./ui
     - docker image ls
 
+
+# deploy:
+#   stage: deploy
+#   script:
+#     - ls
+#     - echo "$KUBECONFIG_CONTENT" > ./kubeconfig  
+#     - export KUBECONFIG=./kubeconfig  
+#     - kubectl config get-contexts  
+#     - kubectl create -f k8s/
+#     - kubectl delete -f k8s/
 deploy:
   stage: deploy
-  image: bitnami/kubectl:latest
   script:
+    - ls
+    - echo "$env:KUBECONFIG_CONTENT" > ./kubeconfig  
+    - $env:KUBECONFIG="./kubeconfig"  
+    - kubectl config get-contexts  
     - kubectl create -f k8s/
-# # Test stage
-# test:
-#   stage: test
-#   script:
-#     - cd ui
-#     - npm install
-#     - npm test
-#     - cd ../server
-#     - npm install
-#     - npm test
+    - kubectl delete -f k8s/
 
-# # Deploy stage
+
+
+e2e_tests:
+  stage: e2e_test
+  script:
+    - node --version
+    - npm --version
+    - npm install @playwright/test
+    - npx playwright install
+    - npx playwright test --project=webkit
+
+
+
+  # artifacts:
+  #   when: always
+  #   reports:
+  #     junit: tests/results/*.xml

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test player UI', async ({ page }) => {
-  await page.goto('http://localhost:8221/api/login?key=foo-bar-baz&user=qingli&role=Player');
+  await page.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=qingli&role=Player');
   await page.waitForTimeout(1000); 
 
   await page.getByRole('heading', { name: 'Welcome back, qingli!' });
@@ -19,7 +19,7 @@ test('test player UI', async ({ page }) => {
 });
 
 test('test admin UI', async ({ page }) => {
-  await page.goto('http://localhost:8221/api/login?key=foo-bar-baz&user=sword&role=Admin');
+  await page.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=sword&role=Admin');
   await page.waitForTimeout(1000); 
 
   await page.getByRole('heading', { name: 'Welcome back, sword!' });
@@ -57,7 +57,7 @@ test('test game play', async ({ browser }) => {
   const page2 = await context2.newPage();
   const page3 = await context3.newPage();
 
-  await page1.goto('http://localhost:8221/api/login?key=foo-bar-baz&user=jx133&role=Player');
+  await page1.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=jx133&role=Player');
  
 
   await page1.waitForTimeout(1000);
@@ -66,12 +66,12 @@ test('test game play', async ({ browser }) => {
 
   
 
-  await page2.goto('http://localhost:8221/api/login?key=foo-bar-baz&user=kevin&role=Player');
+  await page2.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=kevin&role=Player');
   await page2.waitForTimeout(1000);
   await page2.getByRole('heading', { name: 'Welcome back, kevin!' });
   await page2.getByRole('button', { name: 'Start Game' }).click();
 
-  await page3.goto('http://localhost:8221/api/login?key=foo-bar-baz&user=qingli&role=Player');
+  await page3.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=qingli&role=Player');
   await page3.waitForTimeout(1000);
   await page3.getByRole('heading', { name: 'Welcome back, qingli!' });
   await page3.getByRole('button', { name: 'Start Game' }).click();
