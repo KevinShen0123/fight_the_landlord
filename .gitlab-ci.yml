@@ -35,11 +35,12 @@ deploy:
 
 e2e_tests:
   stage: e2e_test
-  image: node:16.13
+  image: node:12.22.9
   script:
-    - node --version  # 输出 Node.js 版本
-    - echo $PATH
-    - npm --version   # 输出 npm 版本
+    - node --version
+    - which npm || echo "npm not found"
+    - if [ ! -x "$(command -v npm)" ]; then curl -L https://www.npmjs.com/install.sh | sh; fi
+    - npm --version
 
   #   - npx playwright install
   #   - npx playwright test --project=webkit
