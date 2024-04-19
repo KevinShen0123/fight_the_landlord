@@ -22,15 +22,25 @@ build_ui:
     - docker image ls
 
 
+# deploy:
+#   stage: deploy
+#   script:
+#     - ls
+#     - echo "$KUBECONFIG_CONTENT" > ./kubeconfig  
+#     - export KUBECONFIG=./kubeconfig  
+#     - kubectl config get-contexts  
+#     - kubectl create -f k8s/
+#     - kubectl delete -f k8s/
 deploy:
   stage: deploy
   script:
     - ls
-    - echo "$KUBECONFIG_CONTENT" > ./kubeconfig  
-    - export KUBECONFIG=./kubeconfig  
+    - echo "$env:KUBECONFIG_CONTENT" > ./kubeconfig  
+    - $env:KUBECONFIG="./kubeconfig"  
     - kubectl config get-contexts  
     - kubectl create -f k8s/
     - kubectl delete -f k8s/
+
 
 
 e2e_tests:
