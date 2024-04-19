@@ -39,6 +39,7 @@ e2e_tests:
   image: node:latest
   script:
     - npm version
+    
   #   - npx playwright install
   #   - npx playwright test --project=webkit
   # artifacts:
