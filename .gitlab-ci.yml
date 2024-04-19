@@ -25,4 +25,4 @@ deploy:
   stage: deploy
   script:
     - ls
-    - kubectl create -f k8s/
+    - kubectl create -f k8s\
