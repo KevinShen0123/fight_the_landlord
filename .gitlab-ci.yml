@@ -38,8 +38,8 @@ e2e_tests:
   stage: e2e_test
   image: node:latest
   script:
-    - npm version
-    
+    - npx playwright test --project=webkit
+
   #   - npx playwright install
   #   - npx playwright test --project=webkit
   # artifacts:
