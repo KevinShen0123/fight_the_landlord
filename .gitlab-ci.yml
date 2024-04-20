@@ -39,7 +39,6 @@ deploy:
     - $env:KUBECONFIG="./kubeconfig"  
     - kubectl config get-contexts  
     - kubectl create -f k8s/
-    - kubectl delete -f k8s/
 
 
 
