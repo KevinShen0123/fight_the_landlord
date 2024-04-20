@@ -156,11 +156,9 @@ socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: numb
   phase.value = newPhase
   playCount.value = newPlayCount
   lastPlayedCards.value=lastPlayedCardsArr
-  alert("previous ok!!!!!"+typeof gameisoverS)
 
   gameisover.value=gameisoverS
   winnerindex.value=winnerindexS
-  alert(gameisover.value+" "+winnerindex.value)
   if(gameisover.value){
     alert("game is over,winner is"+winnerindex.value)
       router.push({

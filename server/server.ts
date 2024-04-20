@@ -130,13 +130,11 @@ function checkGameisOver(lastplayedcards:Card[]){
   }else if(thiscard.playerIndex==2){
     playcount[2]+=1
   }
-  if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
+  if(playcount[0]==14||playcount[1]==14||playcount[2]==14){
     gameisOver=true
     break
   }
  }
- console.log(playcount)
- console.log("game is over?????"+gameisOver)
  return gameisOver
 }
 function determineWinner(lastplayedcards:Card[]){
@@ -154,12 +152,12 @@ function determineWinner(lastplayedcards:Card[]){
     }else if(thiscard.playerIndex==2){
       playcount[2]+=1
     }
-    if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
-      if(playcount[0]==1){
+    if(playcount[0]==14||playcount[1]==14||playcount[2]==14){
+      if(playcount[0]==14){
           winnerindex=0
-      }else if(playcount[1]==1){
+      }else if(playcount[1]==14){
           winnerindex=1
-      }else if(playcount[2]==1){
+      }else if(playcount[2]==14){
           winnerindex=2
       }
       break
@@ -227,10 +225,29 @@ function emitAllGameState() {
 }
 setInterval(() => {
   if (checkGameisOver(gameState.lastPlayedCards)) {
+    const winnerindexA=determineWinner(gameState.lastPlayedCards)
     // Assuming playernames is an array of player names
     playerUserIds.forEach(pname => {
       const usecollection = db.collection("users");
-
+      const playindex=playerUserIds.indexOf(pname)
+      var scoretoadd=0
+      if(playindex==0){
+        if(playindex==winnerindexA){
+          scoretoadd=3
+        }else{
+          scoretoadd=-3
+        }
+      }else{
+        if(playindex==winnerindexA){
+          scoretoadd=1
+        }else{
+          scoretoadd=-1
+        }
+      }
+      var gameWonadd=0
+      if(playindex==winnerindexA){
+        gameWonadd=1
+      }
       // Find the user with the given preferred username
       usecollection.findOne({ preferred_username: pname }, function(err, user) {
         if (err) {
@@ -245,8 +262,8 @@ setInterval(() => {
 
         // Increment each field by 1
         user.gamesPlayed += 1;
-        user.gamesWon += 1
-        user.score += 1;
+        user.gamesWon += gameWonadd;
+        user.score += scoretoadd;
 
         // Update the user in the database
         usecollection.updateOne({ _id: user._id }, { $set: { score: user.score, gamesPlayed: user.gamesPlayed, gamesWon: user.gamesWon } }, function(err, result) {
