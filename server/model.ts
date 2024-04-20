@@ -214,10 +214,7 @@ function moveCardToLastPlayed({ currentTurnPlayerIndex, cardsById }: GameState, 
   // change current last-card-played to unused
   Object.values(cardsById).forEach(c => {
     if (c.locationType === "last-card-played") {
-      console.log("ccard")
-      console.log(c.rank+" "+card.rank)
-      console.log(c.playerIndex+" "+card.playerIndex)
-      console.log("ccard")
+  
       if(c.playerIndex!==card.playerIndex){
         c.locationType="unused"
       }
@@ -243,13 +240,7 @@ function compareSingleCard(realcardtoplay:Card,reallastplayedcard:Card){
     canPlay=true
     return canPlay
   }
-    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-    console.log(realcardtoplay.rank)
-    console.log(Number(realcardtoplay.rank))
-    console.log(Number.isNaN(Number(realcardtoplay.rank)))
-    console.log(Number.isNaN(reallastplayedcard.rank))
-    console.log(Number.isNaN(Number(realcardtoplay.rank))&&!(Number.isNaN(reallastplayedcard.rank)))
-    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+ 
       if(realcardtoplay.rank==="3"&&reallastplayedcard.rank!=="3"){
          canPlay=true
       }else if(realcardtoplay.rank==="2"&&reallastplayedcard.rank!=="2"&&reallastplayedcard.rank!="3"){
@@ -327,12 +318,12 @@ export function doAction(state: GameState, action: Action): Card[] {
   if (action.action === "play-cards") {
     const cardsToPlay = action.cardIds.map(cardId => state.cardsById[cardId]);
     console.log(cardsToPlay)
-    // 检查所有卡牌是否都属于当前玩家
+  
     if (!cardsToPlay.every(card => card.playerIndex === state.currentTurnPlayerIndex)) {
-      return [];  // 如果有卡牌不属于当前玩家，则不允许操作
+      return [];  
     }
   
-    // 获取最后一张打出的卡牌
+ 
     var  lastPlayedCard = getLastPlayedCardS(state.cardsById);
     if(cardsToPlay.length!=lastPlayedCard.length&&lastPlayedCard.length>0){
       console.log("length not equal!!!!!!!!!!")
@@ -340,33 +331,29 @@ export function doAction(state: GameState, action: Action): Card[] {
       for(var x=0;x<cardsToPlay.length;x++){
         for(var h=0;h<lastPlayedCard.length;h++){
           if(lastPlayedCard[h].playerIndex!==cardsToPlay[x].playerIndex){
-            console.log("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-            console.log(lastPlayedCard[h].playerIndex)
-            console.log(cardsToPlay[x].playerIndex)
+         
             indexallsame=false
             break
           }
         }
       }
-      console.log("index all same not equal?"+indexallsame)
+      
       if(!indexallsame){
       return [];
       }
     }
-    // 检查所有卡牌是否可以基于最后打出的卡牌连续打出
+
     var incompatiblecount=0
-    console.log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
-    console.log(lastPlayedCard.length+" "+state.currentTurnPlayerIndex)
-    console.log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+    
     if(cardsToPlay.length===lastPlayedCard.length&&lastPlayedCard.length==1){
-      console.log("1:1 Fight!")
+     
       var reallastplayedcard=lastPlayedCard[0]
       var realcardtoplay=cardsToPlay[0]
       var canPlay=compareSingleCard(realcardtoplay,reallastplayedcard)
       if(!canPlay){
         return []
       }
-      // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
+    
     cardsToPlay.forEach(card => {
       moveCardToLastPlayed(state, card);
       changedCards.push(card);
@@ -416,13 +403,13 @@ export function doAction(state: GameState, action: Action): Card[] {
             break
           }
         }
-        console.log("index all same????????"+indexallsame)
+     
         if(indexallsame){
           for(var n=0;n<lastPlayedCard.length;n++){
               lastPlayedCard[n].locationType="unused"
           }
         }
-        console.log(getLastPlayedCardS(state.cardsById).length)
+   
         lastPlayedCard=getLastPlayedCardS(state.cardsById)
         lastPlayedCard.forEach(lcard=>{
           var idequalcount=0
@@ -488,8 +475,7 @@ export function doAction(state: GameState, action: Action): Card[] {
             }
           }
         }
-        console.log("equaldif")
-        console.log(equaldif)
+        
         if(equaldif===false){
           return []
         }
@@ -513,12 +499,7 @@ export function doAction(state: GameState, action: Action): Card[] {
               secondCt+=1;
             }
           }
-          console.log("YYYYYYYYYYYYYYYY")
-          console.log(firstCt)
-          console.log(secondCt)
-          console.log(cardsToPlay.length)
-          console.log(lastPlayedCard.length)
-          console.log("YYYYYYYYYYYYYYY")
+         
           if(firstCt<=secondCt-1){
             return []
           }
@@ -536,7 +517,7 @@ export function doAction(state: GameState, action: Action): Card[] {
             }
           }
         }
-        console.log("index all same????????"+indexallsame)
+
         if(indexallsame){
           for(var n=0;n<lastPlayedCard.length;n++){
               lastPlayedCard[n].locationType="unused"
@@ -556,16 +537,7 @@ export function doAction(state: GameState, action: Action): Card[] {
         })
       }
     }else{
-      // lastPlayedCard.forEach(lastcard => {
-      //   if (lastcard && !cardsToPlay.every(card => areCompatible(card, lastcard))) {
-      //     incompatiblecount+=1  // 如果有卡牌与最后打出的卡牌不兼容，则不允许操作
-      //   }
-      // })
-      // if(incompatiblecount!==0){
-      //   return []
-      // }
-    
-      // 更新所有卡牌的状态为已打出，并将它们添加到变更列表
+ 
       cardsToPlay.forEach(card => {
         moveCardToLastPlayed(state, card);
         changedCards.push(card);
@@ -579,7 +551,7 @@ export function doAction(state: GameState, action: Action): Card[] {
           }
         }
       }
-      console.log("index all same????????"+indexallsame)
+
       if(indexallsame){
         for(var n=0;n<lastPlayedCard.length;n++){
             lastPlayedCard[n].locationType="unused"

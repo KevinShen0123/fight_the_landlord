@@ -36,7 +36,6 @@
     gamesWon: number;
     lastLogin: string;
     score: number;
-    totalPlayTime: number;
   }
   interface Field {
     key: string;
@@ -53,7 +52,6 @@
     { key: 'gamesWon', label: 'Games Won', sortable: true },
     { key: 'lastLogin', label: 'Last Login', sortable: false, formatter: (value: string) => new Date(value).toLocaleString() },
     { key: 'score', label: 'Score', sortable: true },
-    { key: 'totalPlayTime', label: 'Total Play Time (minutes)', sortable: false },
     { key: 'actions', label: 'Actions', sortable: false }, 
   ];
   function sortData(data: UserStatistic[]): UserStatistic[] {

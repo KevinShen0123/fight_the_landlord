@@ -292,8 +292,7 @@ io.on('connection', client => {
   }
 
   function emitGameState() {
-    console.log("XBBBBBBBBBBBBBBBBBBBBBBB")
-    console.log(gameState.lastPlayedCards)
+   
     client.emit(
       "game-state", 
       playerIndex,
@@ -312,8 +311,7 @@ io.on('connection', client => {
     receiver=paramlist[2]
     var plist=[sender,chatinput,receiver]
     paramlistMy.push(plist)
-    console.log("Paaaa")
-    console.log(paramlistMy)
+
     client.emit("allchat",paramlistMy)
   })
   client.on("getallchat",()=>{
@@ -366,8 +364,7 @@ io.on('connection', client => {
       "updated-cards", 
       Object.values(gameState.cardsById),    
     )
-    console.log("XBBBBBBBBBBBBBBBBBBBBBBB")
-    console.log(gameState.lastPlayedCards)
+ 
     io.emit(
       "game-state", 
       null,
@@ -389,8 +386,7 @@ io.on('connection', client => {
       "all-cards", 
       updatedCards,
     )
-    console.log("XBBBBBBBBBBBBBBBBBBBBBBB")
-    console.log(gameState.lastPlayedCards)
+  
     io.emit(
       "game-state", 
       playerIndex,
@@ -538,8 +534,8 @@ app.get('/api/statistics/users', checkAuthenticated, checkRole(['Admin']), async
   
   try {
     const users = await db.collection('users').find({}).toArray();
-    console.log("STA USER")
-    console.log(users)
+
+    
     res.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
