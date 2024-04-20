@@ -83,7 +83,7 @@ test('test game play', async ({ browser }) => {
   await page1.click('.your-cards .cards-container .card'); 
   await page1.waitForTimeout(1000); 
   await page1.getByRole('button', { name: 'Play Selected Cards' }).click();
-  await page1.waitForTimeout(3000);
+  await page1.waitForTimeout(1000);
   const pileCardCount = await page1.$$eval('.card-pile .cards-container .card', cards => cards.length);
   expect(pileCardCount).toBeGreaterThan(0);
   const cardCountAfterPlay = await page1.$$eval('.your-cards .cards-container .card', cards => cards.length);
@@ -91,7 +91,7 @@ test('test game play', async ({ browser }) => {
 
   const initialCardCountPage2 = await page2.$$eval('.your-cards .cards-container .card', cards => cards.length);
   const pileCardCountPage2BeforePass = await page2.$$eval('.card-pile .cards-container .card', cards => cards.length);
-  await page2.waitForTimeout(3000); 
+  await page2.waitForTimeout(1000); 
   await page2.getByRole('button', { name: 'Pass' }).click(); 
   const cardCountAfterPassPage2 = await page2.$$eval('.your-cards .cards-container .card', cards => cards.length);
   expect(cardCountAfterPassPage2).toBe(initialCardCountPage2);
@@ -100,7 +100,7 @@ test('test game play', async ({ browser }) => {
 
   const initialCardCountPage3 = await page3.$$eval('.your-cards .cards-container .card', cards => cards.length);
   const pileCardCountPage3BeforePass = await page3.$$eval('.card-pile .cards-container .card', cards => cards.length);
-  await page3.waitForTimeout(3000); 
+  await page3.waitForTimeout(1000); 
   await page3.getByRole('button', { name: 'Pass' }).click(); 
   const cardCountAfterPassPage3 = await page3.$$eval('.your-cards .cards-container .card', cards => cards.length);
   expect(cardCountAfterPassPage3).toBe(initialCardCountPage3);

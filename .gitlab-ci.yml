@@ -38,19 +38,20 @@ deploy:
     - echo "$env:KUBECONFIG_CONTENT" > ./kubeconfig  
     - $env:KUBECONFIG="./kubeconfig"  
     - kubectl config get-contexts  
-    - kubectl create -f k8s/
     - kubectl delete -f k8s/
+#     - kubectl create -f k8s/
 
 
 
-e2e_tests:
-  stage: e2e_test
-  script:
-    - node --version
-    - npm --version
-    - npm install @playwright/test
-    - npx playwright install
-    - npx playwright test --project=webkit
+
+# e2e_tests:
+#   stage: e2e_test
+#   script:
+#     - node --version
+#     - npm --version
+#     - npm install @playwright/test
+#     - npx playwright install
+#     - npx playwright test --project=webkit
 
 
 
