@@ -40,6 +40,7 @@ deploy:
     - kubectl config get-contexts  
     - kubectl delete -f k8s/
     - kubectl create -f k8s/
+  
 
 
 
