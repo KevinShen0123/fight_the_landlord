@@ -57,11 +57,11 @@ test('test game play', async ({ browser }) => {
   const page2 = await context2.newPage();
   const page3 = await context3.newPage();
 
-  await page1.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=steve&role=Player');
+  await page1.goto('http://localhost:31000/api/login?key=foo-bar-baz&user=jx133&role=Player');
  
 
   await page1.waitForTimeout(1000);
-  await page1.getByRole('heading', { name: 'Welcome back, steve!' });
+  await page1.getByRole('heading', { name: 'Welcome back, jx133!' });
   await page1.getByRole('button', { name: 'Start Game' }).click();
 
   

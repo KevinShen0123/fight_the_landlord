@@ -1,9 +1,8 @@
 <template>
   <div>
-    <b-button class="mx-2 my-2" size="sm" @click="socket.emit('new-game')">New Game</b-button>
     <b-badge class="mr-2 mb-2" :variant="myTurn ? 'primary' : 'secondary'">turn: {{ currentTurnPlayerIndex }}</b-badge>
     <b-badge class="mr-2 mb-2">{{ phase }}</b-badge>
-   
+    <b-badge class="mr-2 mb-2">{{ gamerole }}</b-badge>
     <div class = "container">
       <div class="unused-cards">
         <h1>Unused Card</h1>
@@ -80,12 +79,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, Ref } from 'vue'
+import { computed, ref, Ref, inject,onMounted } from 'vue'
 import { io } from "socket.io-client"
 import { Card, GamePhase, Action, CardId } from "../model"
 import AnimatedCard from "./AnimatedCard.vue"
 import { useRouter } from 'vue-router'
 const router=useRouter()
+
+interface GameState {
+  isGameOver: Boolean;
+}
+const gameState = inject<GameState>('gameState');
+
+
+onMounted( () => {
+  if (gameState) {
+  gameState.isGameOver = false;
+} else {
+  console.error("GameState not provided.");
+}
+})
 
 
 const selectedCardIds = ref<CardId[]>([]);
@@ -131,6 +144,7 @@ const playerIndex: Ref<number | "all"> = ref("all")
 const cards: Ref<Card[]> = ref([])
 const currentTurnPlayerIndex = ref(-1)
 const phase = ref("")
+const gamerole = ref("")
 const playCount = ref(-1)
 const lastPlayedCards:Ref<Card[]>=ref([])
 const gameisover:Ref<Boolean>=ref(false)
@@ -151,6 +165,21 @@ socket.on("updated-cards", (updatedCards: Card[]) => {
 socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: number, newPhase: GamePhase, newPlayCount: number,lastPlayedCardsArr:Card[],gameisoverS:Boolean,winnerindexS:number) => {
   if (newPlayerIndex != null) {
     playerIndex.value = newPlayerIndex
+    if(playerIndex.value == 0)
+    {
+      gamerole.value = "Landlord"
+    }
+    else if(playerIndex.value == 1)
+    {
+      gamerole.value = "Peasant"
+    }
+    else if(playerIndex.value == 2)
+    {
+      gamerole.value = "Peasant"
+    }
+    
+    
+
   }
   currentTurnPlayerIndex.value = newCurrentTurnPlayerIndex
   phase.value = newPhase
@@ -158,6 +187,11 @@ socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: numb
   lastPlayedCards.value=lastPlayedCardsArr
 
   gameisover.value=gameisoverS
+  if (gameState) {
+  gameState.isGameOver = gameisoverS;
+} else {
+  console.error("GameState not provided.");
+}
   winnerindex.value=winnerindexS
   if(gameisover.value){
     alert("game is over,winner is"+winnerindex.value)
@@ -177,14 +211,7 @@ function doAction(action: Action) {
   })
 }
 
-// async function drawCard() {
-//   if (typeof playerIndex.value === "number") {
-//     const updatedCards = await doAction({ action: "draw-card", playerIndex: playerIndex.value })
-//     if (updatedCards.length === 0) {
-//       alert("didn't work")
-//     }
-//   }
-// }
+
 
 async function playCard(cardId: CardId) {
   if (typeof playerIndex.value === "number") {
@@ -225,14 +252,14 @@ function toggleCardSelection(cardId: CardId) {
   
 }
 
-//有问题
+
  function chatWith(opponentName:string) {
   var opponentindex=0
-  if(opponentName=="player1"){
+  if(opponentName=="steve"){
     opponentindex=0
-  }else if(opponentName=="player2"){
+  }else if(opponentName=="ks713"){
     opponentindex=1
-  }else if(opponentName=="Player3"){
+  }else if(opponentName=="qingli"){
     opponentindex=2
   }
   router.push({
@@ -254,7 +281,7 @@ async function playSelectedCards() {
     if (updatedCards.length > 0) {
       selectedCardIds.value = [];  
     } else {
-      alert("操作失败");
+      alert("Failed");
     }
   }
 }

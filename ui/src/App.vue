@@ -7,7 +7,7 @@
       </b-navbar-brand>
       <b-navbar-nav>
         <b-nav-item v-if="user?.preferred_username == null" href="/api/login">Login</b-nav-item>
-        <b-nav-item v-if="user?.preferred_username" :to="{ name: 'Home' }">Home</b-nav-item> 
+        <b-nav-item v-if="user?.preferred_username && gameState?.isGameOver" :to="{ name: 'Home' }">Home</b-nav-item> 
         <b-nav-item v-if="user?.preferred_username" @click="logout">Logout</b-nav-item>
         <form method="POST" action="/api/logout" id="logoutForm" />
 
@@ -18,10 +18,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, provide } from 'vue'
+import { onMounted, ref, provide,reactive } from 'vue'
 
 const user = ref({} as any)
 provide("user", user)
+interface GameState {
+  isGameOver: boolean;
+}
+const gameState = reactive<GameState>({
+  isGameOver: true
+});
+provide('gameState', gameState)
 
 onMounted(async () => {
   user.value = await (await fetch("/api/user")).json()

@@ -108,7 +108,7 @@ const wrap = (middleware: any) => (socket: any, next: any) => middleware(socket.
 io.use(wrap(sessionMiddleware))
 
 // hard-coded game configuration
-const playerUserIds = ["steve","ks713","qingli"]
+const playerUserIds = ["jx133","ks713","qingli"]
 var rolelist=["Landlord","Peasant","Peasant"]
 let gameState = createEmptyGame(playerUserIds, 1, 13)
 var sender=""
