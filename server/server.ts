@@ -130,7 +130,7 @@ function checkGameisOver(lastplayedcards:Card[]){
   }else if(thiscard.playerIndex==2){
     playcount[2]+=1
   }
-  if(playcount[0]==14||playcount[1]==14||playcount[2]==14){
+  if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
     gameisOver=true
     break
   }
@@ -154,12 +154,12 @@ function determineWinner(lastplayedcards:Card[]){
     }else if(thiscard.playerIndex==2){
       playcount[2]+=1
     }
-    if(playcount[0]==14||playcount[1]==14||playcount[2]==14){
-      if(playcount[0]==14){
+    if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
+      if(playcount[0]==1){
           winnerindex=0
-      }else if(playcount[1]==14){
+      }else if(playcount[1]==1){
           winnerindex=1
-      }else if(playcount[2]==14){
+      }else if(playcount[2]==1){
           winnerindex=2
       }
       break
@@ -225,11 +225,46 @@ function emitAllGameState() {
       determineWinner(gameState.lastPlayedCards)
   );
 }
-setInterval(()=>{
-  if(checkGameisOver(gameState.lastPlayedCards)){
-    gameState= createEmptyGame(playerUserIds, 1, 13)
+setInterval(() => {
+  if (checkGameisOver(gameState.lastPlayedCards)) {
+    // Assuming playernames is an array of player names
+    playerUserIds.forEach(pname => {
+      const usecollection = db.collection("users");
+
+      // Find the user with the given preferred username
+      usecollection.findOne({ preferred_username: pname }, function(err, user) {
+        if (err) {
+          console.error('Error finding user:', err);
+          return;
+        }
+
+        if (!user) {
+          console.error('User not found');
+          return;
+        }
+
+        // Increment each field by 1
+        user.gamesPlayed += 1;
+        user.gamesWon += 1
+        user.score += 1;
+
+        // Update the user in the database
+        usecollection.updateOne({ _id: user._id }, { $set: { score: user.score, gamesPlayed: user.gamesPlayed, gamesWon: user.gamesWon } }, function(err, result) {
+          if (err) {
+            console.error('Error updating user:', err);
+            return;
+          }
+
+          console.log('User updated successfully');
+        });
+      });
+    });
+
+    // Reset gameState
+    gameState = createEmptyGame(playerUserIds, 1, 13);
   }
-},1500)
+}, 1500);
+
 
 io.on('connection', client => {
   const user = (client.request as any).session?.passport?.user
