@@ -130,7 +130,7 @@ function checkGameisOver(lastplayedcards:Card[]){
   }else if(thiscard.playerIndex==2){
     playcount[2]+=1
   }
-  if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
+  if(playcount[0]==14||playcount[1]==14||playcount[2]==14){
     gameisOver=true
     break
   }
@@ -154,12 +154,12 @@ function determineWinner(lastplayedcards:Card[]){
     }else if(thiscard.playerIndex==2){
       playcount[2]+=1
     }
-    if(playcount[0]==1||playcount[1]==1||playcount[2]==1){
-      if(playcount[0]==1){
+    if(playcount[0]==14||playcount[1]==14||playcount[2]==14){
+      if(playcount[0]==14){
           winnerindex=0
-      }else if(playcount[1]==1){
+      }else if(playcount[1]==14){
           winnerindex=1
-      }else if(playcount[2]==1){
+      }else if(playcount[2]==14){
           winnerindex=2
       }
       break
@@ -225,7 +225,11 @@ function emitAllGameState() {
       determineWinner(gameState.lastPlayedCards)
   );
 }
-
+setInterval(()=>{
+  if(checkGameisOver(gameState.lastPlayedCards)){
+    gameState= createEmptyGame(playerUserIds, 1, 13)
+  }
+},1500)
 
 io.on('connection', client => {
   const user = (client.request as any).session?.passport?.user

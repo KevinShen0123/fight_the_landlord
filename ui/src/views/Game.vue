@@ -163,6 +163,9 @@ socket.on("game-state", (newPlayerIndex: number, newCurrentTurnPlayerIndex: numb
   alert(gameisover.value+" "+winnerindex.value)
   if(gameisover.value){
     alert("game is over,winner is"+winnerindex.value)
+      router.push({
+  path: '/player'
+})
   }
 })
 function doAction(action: Action) {
