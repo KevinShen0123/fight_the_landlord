@@ -44,7 +44,7 @@
         <div class="your-cards">
           <h1>Your Card</h1>
           <div class="button-container">
-               <b-button size="sm" @click="playSelectedCards" :disabled="!myTurn || selectedCardIds.length === 0">Play Selected Cards</b-button> 
+               <b-button size="sm" @click="playSelectedCards" :disabled="!myTurn || selectedCardIds.length === 0">XXSD</b-button> 
                <b-button :disabled="!myTurn" @click="pass">Pass</b-button>
           </div>
           <div class="cards-container">
