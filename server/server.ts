@@ -609,7 +609,7 @@ client.connect().then(async () => {
       scope: 'openid profile email',
       nonce: generators.nonce(),
       //redirect_uri: `http://${HOST}:8221/api/login-callback`,
-      redirect_uri: `http://${HOST}:8221/api/login-callback`,
+      redirect_uri: `http://${HOST}:31000/api/login-callback`,
       state: generators.state(),
     }
     
